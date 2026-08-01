@@ -672,10 +672,18 @@ footer{border-top:1px solid var(--border);background:var(--g50);margin-top:4rem;
           </div>
           <div>
             <label>Fotos e vídeos do produto</label>
+            <!-- LINK DO CLOUDINARY -->
+            <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+              <input class="field" type="text" id="pf-media-link" placeholder="Cole aqui o link do Cloudinary (foto ou vídeo)..." style="flex:1"/>
+              <button class="btn btn-primary btn-sm" onclick="addMediaLink()" type="button">Adicionar</button>
+            </div>
+            <div style="font-size:.75rem;color:var(--muted);margin-bottom:.75rem">Ex: https://res.cloudinary.com/seu-link-aqui</div>
+
+            <!-- OU UPLOAD DIRETO -->
             <div class="media-upload-area" onclick="document.getElementById('pf-media').click()">
               <input type="file" id="pf-media" multiple accept="image/*,video/*" onchange="handleMediaUpload(this)"/>
-              <div style="font-size:1.5rem;margin-bottom:.4rem">📷</div>
-              <div style="font-size:.85rem;font-weight:700">Clique para adicionar fotos ou vídeos</div>
+              <div style="font-size:1.5rem;margin-bottom:.4rem">📁</div>
+              <div style="font-size:.85rem;font-weight:700">Ou clique para fazer upload do arquivo</div>
               <div style="font-size:.75rem;color:var(--muted);margin-top:.2rem">JPG, PNG, MP4, MOV — máximo 50MB cada</div>
             </div>
             <div class="media-preview" id="pf-media-preview"></div>
@@ -1306,6 +1314,17 @@ function closeProductForm(){
 }
 
 function toggleTag(btn,val){btn.classList.toggle('active');}
+
+function addMediaLink(){
+  const input=document.getElementById('pf-media-link');
+  const url=input.value.trim();
+  if(!url){showToast('Cole um link primeiro!');return;}
+  const isVideo=url.match(/\.(mp4|mov|avi|webm|mkv)/i)||url.includes('/video/');
+  tempMedia.push({type:isVideo?'video':'image',data:url,name:'link'});
+  renderMediaPreview();
+  input.value='';
+  showToast('✓ Mídia adicionada!');
+}
 
 function handleMediaUpload(input){
   const files=Array.from(input.files);
