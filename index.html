@@ -654,6 +654,16 @@ async function supaUpsert(table,data){return supa(table,{method:'POST',headers:{
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
+const DEFAULT_PRODUCTS=[
+  {id:'camiseta-oversized',name:'Camiseta Oversized Trama',category:'camisetas',price:89.9,old_price:119.9,colors:['preto','branco','coral'],sizes:['P','M','G','GG'],tags:['mais-vendido'],description:'100% algodão, caimento oversized perfeito.',media:[]},
+  {id:'moletom-canguru',name:'Moletom Canguru Asphalt',category:'moletons',price:189.9,old_price:null,colors:['preto','bege','azul'],sizes:['P','M','G','GG','XG'],tags:['novo'],description:'Flanelado, macio e quentinho.',media:[]},
+  {id:'calca-cargo',name:'Calça Cargo Urban Fit',category:'calcas',price:219.9,old_price:259.9,colors:['preto','verde','bege'],sizes:['38','40','42','44','46'],tags:[],description:'Sarja pesada, 6 bolsos funcionais.',media:[]},
+  {id:'jaqueta-corta-vento',name:'Jaqueta Corta-Vento Trama',category:'jaquetas',price:259.9,old_price:null,colors:['preto','coral','azul'],sizes:['P','M','G','GG'],tags:['mais-vendido'],description:'Impermeável, costuras seladas.',media:[]},
+  {id:'bone-aba-reta',name:'Boné Aba Reta Trama',category:'acessorios',price:79.9,old_price:99.9,colors:['preto','branco'],sizes:['Único'],tags:[],description:'Sarja de qualidade, bordado 3D.',media:[]},
+  {id:'moletom-cropped',name:'Moletom Cropped Lime',category:'moletons',price:169.9,old_price:199.9,colors:['preto','coral'],sizes:['PP','P','M','G'],tags:['mais-vendido'],description:'Cropped com detalhe refletivo.',media:[]},
+  {id:'calca-jogger',name:'Calça Jogger Tech Fleece',category:'calcas',price:199.9,old_price:null,colors:['preto','bege','verde'],sizes:['P','M','G','GG','XG'],tags:[],description:'Tech fleece macio, bolsos com zíper.',media:[]},
+  {id:'camiseta-listrada',name:'Camiseta Listrada Linha Fina',category:'camisetas',price:94.9,old_price:null,colors:['preto','branco','azul'],sizes:['PP','P','M','G'],tags:['novo'],description:'Malha canelada, listras finas.',media:[]}
+];
 let PRODUCTS=[];
 let cart=JSON.parse(localStorage.getItem('trama.cart')||'[]');
 let isDark=localStorage.getItem('trama.theme')==='dark';
@@ -742,8 +752,11 @@ function productCardHTML(p){
 async function renderHome(){
   document.getElementById('home-bestsellers').innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
   const products=await supaGet('products','order=created_at.desc&limit=20');
-  if(!products){document.getElementById('home-bestsellers').innerHTML='<p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:2rem">Nenhum produto cadastrado ainda.</p>';return;}
-  PRODUCTS=products;
+  if(!products||products.length===0){
+    PRODUCTS=DEFAULT_PRODUCTS;
+  } else {
+    PRODUCTS=products;
+  }
   const best=products.filter(p=>(p.tags||[]).includes('mais-vendido')).slice(0,4);
   const news=products.filter(p=>(p.tags||[]).includes('novo')).slice(0,4);
   const display=best.length?best:products.slice(0,4);
@@ -760,7 +773,18 @@ async function renderCategory(slug){
   document.getElementById('cat-breadcrumb').innerHTML='<a href="#" onclick="navigate(\'home\');return false">Início</a> / <span>'+CATS[slug]+'</span>';
   document.getElementById('cat-products').innerHTML='<div class="loading"><div class="spinner"></div>Carregando...</div>';
   const list=await supaGet('products','category=eq.'+slug+'&order=created_at.desc');
-  if(!list||list.length===0){document.getElementById('cat-products').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">Nenhum produto nesta categoria ainda.</div>';document.getElementById('cat-count').textContent='0 produtos';return;}
+  if(!list||list.length===0){
+    const fallback=DEFAULT_PRODUCTS.filter(p=>p.category===slug);
+    if(fallback.length>0){
+      PRODUCTS=[...new Map([...PRODUCTS,...fallback].map(p=>[p.id,p])).values()];
+      document.getElementById('cat-count').textContent=fallback.length+' produto(s)';
+      document.getElementById('cat-products').innerHTML=fallback.map(productCardHTML).join('');
+    } else {
+      document.getElementById('cat-products').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">Nenhum produto nesta categoria ainda.</div>';
+      document.getElementById('cat-count').textContent='0 produtos';
+    }
+    return;
+  }
   PRODUCTS=[...new Map([...PRODUCTS,...list].map(p=>[p.id,p])).values()];
   document.getElementById('cat-count').textContent=list.length+' produto(s)';
   document.getElementById('cat-products').innerHTML=list.map(productCardHTML).join('');
