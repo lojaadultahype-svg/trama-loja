@@ -799,11 +799,20 @@ function renderCat(slug) {
 }
 
 function renderProd(id) {
-  var p = null;
-  for (var i = 0; i < PRODS.length; i++) { if (PRODS[i].id === id) { p = PRODS[i]; break; } }
-  if (!p) { for (var j = 0; j < DEF.length; j++) { if (DEF[j].id === id) { p = DEF[j]; break; } } }
-  if (!p) { dbGet('products', 'id=eq.' + encodeURIComponent(id)).then(function(r) { if (r && r[0]) renderProdData(r[0]); }); return; }
-  renderProdData(p);
+  // Sempre buscar do Supabase para garantir dados atualizados
+  dbGet('products', 'id=eq.' + encodeURIComponent(id)).then(function(r) {
+    if (r && r[0]) {
+      renderProdData(r[0]);
+    } else {
+      // Se não encontrar no Supabase, tenta DEF
+      for (var j = 0; j < DEF.length; j++) { 
+        if (DEF[j].id === id) { 
+          renderProdData(DEF[j]); 
+          break; 
+        } 
+      }
+    }
+  });
 }
 
 function renderProdData(p) {
