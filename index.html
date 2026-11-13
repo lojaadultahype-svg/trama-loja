@@ -360,7 +360,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
             <span style="font-size:1.3rem">👗</span>
             <div>
               <div style="font-weight:800;font-size:.9rem">Provador Virtual</div>
-              <div style="font-size:.72rem;color:var(--muted)">Descubra seu tamanho ideal com IA</div>
+              <div style="font-size:.72rem;color:var(--muted)">Descubra seu tamanho pelas suas medidas</div>
             </div>
           </div>
           <div class="medidas-grid" style="margin-bottom:.65rem">
@@ -495,7 +495,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
 <div id="view-provador" class="view">
   <div class="wrap" style="padding-top:1.5rem;padding-bottom:4rem">
     <div class="breadcrumb"><a href="#" onclick="nav('home');return false">Inicio</a> / <span>Provador Virtual</span></div>
-    <div class="eyebrow" style="margin-bottom:.25rem">Tecnologia IA</div>
+    <div class="eyebrow" style="margin-bottom:.25rem">Acerte o tamanho</div>
     <h1 class="font-display display-md" style="margin-bottom:.5rem">Provador Virtual</h1>
     <p style="color:var(--muted);margin-bottom:2rem;font-size:.9rem">Informe suas medidas e descubra qual tamanho e perfeito para voce!</p>
     <div style="max-width:700px;margin:0 auto">
@@ -525,7 +525,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
       </div>
       <div style="text-align:center;margin-bottom:1.5rem">
         <button class="btn btn-primary" style="padding:1rem 2.5rem" id="btn-pv" onclick="calcProv()">Encontrar meu tamanho</button>
-        <p style="font-size:.75rem;color:var(--muted);margin-top:.5rem">IA analisa suas medidas e recomenda o tamanho ideal</p>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:.5rem">Comparamos suas medidas com a tabela de tamanhos da peça. Na dúvida, te ajudamos no WhatsApp.</p>
       </div>
       <div id="pv-result"></div>
     </div>
@@ -623,6 +623,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
           </div>
           <div>
             <label>Tabela de medidas por tamanho (para o Provador)</label>
+            <p style="font-size:.75rem;color:var(--coral);font-weight:600;margin-bottom:.5rem">Informe as medidas do CORPO de quem veste cada tamanho, não da peça. Se medir a peça, tire uns 6 cm do busto e da cintura.</p>
             <div style="overflow-x:auto">
               <table style="width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:.5rem">
                 <thead><tr style="background:var(--subtle)">
@@ -1032,6 +1033,14 @@ function fillPadrao(gen) {
   });
   toast('Tabela padrao ' + (gen === 'f' ? 'feminina' : 'masculina') + ' preenchida!');
 }
+var pvUltimo = null;
+var BTN_AJUDA = '<button type="button" class="btn btn-secondary" style="width:100%;margin-top:.65rem" onclick="pedirAjudaTam()">Prefiro ajuda no WhatsApp</button>';
+function pedirAjudaTam() {
+  if (!pvUltimo) return;
+  var d = pvUltimo.d, med = 'Altura ' + d.a + ' cm, peso ' + d.p + ' kg' + (d.b ? ', busto ' + d.b + ' cm' : '') + (d.c ? ', cintura ' + d.c + ' cm' : '') + (d.q ? ', quadril ' + d.q + ' cm' : '') + ' (' + d.g + ')';
+  var txt = 'Ola! Quero ajuda para escolher o tamanho de: ' + pvUltimo.nome + '.\nMinhas medidas: ' + med + '.\nO provador do site indicou: ' + pvUltimo.size + '.';
+  window.open('https://wa.me/' + getWA() + '?text=' + encodeURIComponent(txt), '_blank');
+}
 function recSize(prod, d) {
   var sizes = prod.sizes || [];
   if (!sizes.length) return { size: 'M', why: 'Este produto nao tem tamanhos cadastrados.' };
@@ -1073,7 +1082,8 @@ function calcInline() {
   var d = { a: document.getElementById('il-altura').value, p: document.getElementById('il-peso').value, b: document.getElementById('il-busto').value, c: document.getElementById('il-cintura').value, g: document.getElementById('il-genero').value };
   if (!d.a || !d.p) { toast('Informe altura e peso!'); return; }
   var r = recSize(curProd, d);
-  document.getElementById('il-result').innerHTML = '<div style="background:rgba(180,255,57,.12);border:1px solid #B4FF39;border-radius:.75rem;padding:.75rem;font-size:.83rem;line-height:1.6"><div style="font-weight:800;font-size:1rem">Tamanho recomendado: ' + r.size + '</div>' + r.why + '</div>';
+  pvUltimo = { nome: curProd.name, d: d, size: r.size };
+  document.getElementById('il-result').innerHTML = '<div style="background:rgba(180,255,57,.12);border:1px solid #B4FF39;border-radius:.75rem;padding:.75rem;font-size:.83rem;line-height:1.6"><div style="font-weight:800;font-size:1rem">Tamanho recomendado: ' + r.size + '</div>' + r.why + '</div>' + BTN_AJUDA;
   var sb = document.querySelectorAll('#prod-sizes .size-btn');
   for (var i = 0; i < sb.length; i++) if (sb[i].textContent.trim() === r.size) { selSize(r.size, sb[i]); break; }
 }
@@ -1253,6 +1263,7 @@ function calcProv() {
   var d = { a: document.getElementById('pv-altura').value, p: document.getElementById('pv-peso').value, b: document.getElementById('pv-busto').value, c: document.getElementById('pv-cintura').value, q: document.getElementById('pv-quadril').value, g: document.getElementById('pv-genero').value };
   if (!d.a || !d.p) { toast('Informe altura e peso!'); return; }
   var r = recSize(pvProd, d);
+  pvUltimo = { nome: pvProd.name, d: d, size: r.size };
   var m0 = (pvProd.media || [])[0]; var ps = m0 ? gsrc(m0) : ''; var pv = m0 ? isvid(m0) : false;
   document.getElementById('pv-result').innerHTML = '<div class="card">' +
     '<div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">' +
@@ -1260,7 +1271,7 @@ function calcProv() {
     '<div><div style="font-size:.7rem;color:var(--coral);font-weight:700;text-transform:uppercase">Resultado</div><div style="font-weight:800;font-size:1rem">' + pvProd.name + '</div><div style="font-size:.78rem;color:var(--muted)">' + d.a + 'cm - ' + d.p + 'kg</div></div></div>' +
     '<div style="font-size:1.4rem;font-weight:800;margin-bottom:.35rem">Tamanho recomendado: ' + r.size + '</div>' +
     '<div style="font-size:.88rem;line-height:1.7;color:var(--muted)">' + r.why + '</div>' +
-    '<div style="display:flex;gap:.5rem;margin-top:1rem"><button class="btn btn-lime" style="flex:1" onclick="nav(\'product\',\'' + pvProd.id + '\')">Ver produto</button><button class="btn btn-primary" style="flex:1" onclick="nav(\'cart\')">Ir para sacola</button></div></div>';
+    '<div style="display:flex;gap:.5rem;margin-top:1rem"><button class="btn btn-lime" style="flex:1" onclick="nav(\'product\',\'' + pvProd.id + '\')">Ver produto</button><button class="btn btn-primary" style="flex:1" onclick="nav(\'cart\')">Ir para sacola</button></div>' + BTN_AJUDA + '</div>';
 }
 
 function openAdmin() {
