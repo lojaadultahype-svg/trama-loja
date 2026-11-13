@@ -1,0 +1,16 @@
+# Acessa o banco 1x por dia para o Supabase gratis nao pausar o projeto.
+# Para desligar: apague este arquivo.
+name: Manter Supabase ativo
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar produtos
+        run: |
+          curl -sf "https://rgxdjyxfqclmzmtcprfc.supabase.co/rest/v1/products?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJneGRqeXhmcWNsbXptdGNwcmZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2MjE3NTAsImV4cCI6MjEwMTE5Nzc1MH0.ZHztnrT4BPGm_9pnZ_COfYPW7RnD3IXGDPIxlZDLQyc" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJneGRqeXhmcWNsbXptdGNwcmZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2MjE3NTAsImV4cCI6MjEwMTE5Nzc1MH0.ZHztnrT4BPGm_9pnZ_COfYPW7RnD3IXGDPIxlZDLQyc"
