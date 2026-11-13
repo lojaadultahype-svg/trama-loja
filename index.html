@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
+<meta name="theme-color" content="#0E0E10"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>TRAMA Luxury | Moda em São Félix do Xingu</title>
 <meta name="description" content="TRAMA Luxury, loja de roupas em São Félix do Xingu - PA. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire com a gente. Pix ou pagamento na entrega."/>
@@ -15,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
-:root{--ink:#16181D;--bone:#F6F4EF;--coral:#FF5470;--coral-d:#E63E5C;--lime:#B4FF39;--lime-d:#9BE01F;--g100:#E9E7E1;--g200:#D3D1CB;--g300:#A8A7A1;--g400:#8A8D94;--g500:#5C5F66;--g600:#3D3F45;--g700:#26282D;--g800:#1D1F24;--g900:#16181D;--bg:var(--bone);--fg:var(--ink);--card:white;--border:var(--g200);--muted:var(--g500);--subtle:var(--g100);--rad:16px;--rad-sm:10px;--rad-full:999px;--shadow:0 4px 24px rgba(0,0,0,.08);--trans:all .2s ease}
+:root{--ink:#0E0E10;--bone:#F6F4EF;--coral:#C9A45C;--coral-d:#B08D45;--lime:#E6CF9A;--lime-d:#D4B97C;--g100:#E9E7E1;--g200:#D3D1CB;--g300:#A8A7A1;--g400:#8A8D94;--g500:#5C5F66;--g600:#3D3F45;--g700:#2A2A2E;--g800:#18181B;--g900:#0E0E10;--bg:var(--bone);--fg:var(--ink);--card:white;--border:var(--g200);--muted:var(--g500);--subtle:var(--g100);--rad:16px;--rad-sm:10px;--rad-full:999px;--shadow:0 4px 24px rgba(0,0,0,.08);--trans:all .2s ease}
 .dark{--bg:var(--ink);--fg:var(--bone);--card:var(--g800);--border:var(--g700);--muted:var(--g400);--subtle:var(--g800)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -35,7 +36,7 @@ input,select,textarea{font-family:inherit}
 .display-xl{font-size:clamp(2.5rem,8vw,5.5rem);line-height:.95}
 .display-md{font-size:clamp(1.5rem,4vw,2.5rem);line-height:1}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border-radius:var(--rad-full);padding:.85rem 1.5rem;font-size:.8rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;transition:var(--trans);cursor:pointer;white-space:nowrap;border:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.btn-primary{background:var(--coral);color:white}.btn-primary:active{background:var(--coral-d)}
+.btn-primary{background:var(--coral);color:var(--ink)}.btn-primary:active{background:var(--coral-d)}
 .btn-lime{background:var(--lime);color:var(--ink)}.btn-lime:active{background:var(--lime-d)}
 .btn-secondary{background:transparent;color:var(--fg);border:2px solid var(--fg)}
 .btn-ghost{background:transparent;color:var(--fg)}
@@ -52,7 +53,7 @@ label{font-size:.8rem;font-weight:600;margin-bottom:.35rem;display:block;color:v
 .marquee-item{white-space:nowrap;font-size:.68rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--lime);padding:0 1.5rem}
 @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 #header{position:sticky;top:0;z-index:40;background:rgba(246,244,239,.93);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-.dark #header{background:rgba(22,24,29,.93)}
+.dark #header{background:rgba(14,14,16,.9)}
 .header-inner{height:4rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem}
 .logo{font-family:'Anton',sans-serif;font-size:1.6rem;text-transform:uppercase}
 .logo-img{display:inline-flex;align-items:center;gap:.6rem}
@@ -71,7 +72,7 @@ label{font-size:.8rem;font-weight:600;margin-bottom:.35rem;display:block;color:v
 .mobile-menu{position:fixed;top:0;right:0;height:100%;width:85%;max-width:20rem;background:var(--bg);z-index:50;padding:1.5rem;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column;overflow-y:auto}
 .mobile-menu.open{transform:translateX(0)}
 .mobile-nav-link{display:block;padding:.85rem 0;border-bottom:1px solid var(--border);font-size:1rem;font-weight:700;touch-action:manipulation}
-#hero{background:var(--ink);color:var(--bone);padding:3rem 0 3.5rem}
+#hero{background:radial-gradient(circle at 85% 15%,rgba(201,164,92,.16),transparent 55%),var(--ink);color:var(--bone);padding:3rem 0 3.5rem}
 @media(min-width:1024px){#hero{padding:5rem 0 6rem}}
 .hero-grid{display:grid;gap:2rem;align-items:center}
 @media(min-width:1024px){.hero-grid{grid-template-columns:1fr 1fr}}
@@ -86,7 +87,7 @@ label{font-size:.8rem;font-weight:600;margin-bottom:.35rem;display:block;color:v
 .product-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--g400);font-size:.75rem;text-align:center;padding:1rem}
 .badges{position:absolute;top:.65rem;left:.65rem;display:flex;flex-direction:column;gap:.35rem;z-index:1}
 .badge-tag{border-radius:var(--rad-full);padding:.3rem .6rem;font-size:.62rem;font-weight:700;text-transform:uppercase}
-.badge-promo{background:var(--coral);color:white}
+.badge-promo{background:var(--coral);color:var(--ink)}
 .badge-novo{background:var(--lime);color:var(--ink)}
 .product-info{margin-top:.65rem}
 .product-name{font-size:.88rem;font-weight:700;line-height:1.3}
@@ -106,8 +107,8 @@ label{font-size:.8rem;font-weight:600;margin-bottom:.35rem;display:block;color:v
 .thumb.active{border-color:var(--coral)}
 .thumb img,.thumb video{width:100%;height:100%;object-fit:cover}
 .size-btns{display:flex;flex-wrap:wrap;gap:.5rem}
-.size-btn{min-width:3.2rem;min-height:3.2rem;padding:.5rem .75rem;border:2px solid var(--border);border-radius:.65rem;font-size:.9rem;font-weight:700;cursor:pointer;background:var(--card);color:var(--fg);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:rgba(255,84,112,.2);touch-action:manipulation;transition:border-color .15s,background .15s,color .15s;user-select:none}
-.size-btn.active{border-color:var(--coral)!important;background:var(--coral)!important;color:white!important}
+.size-btn{min-width:3.2rem;min-height:3.2rem;padding:.5rem .75rem;border:2px solid var(--border);border-radius:.65rem;font-size:.9rem;font-weight:700;cursor:pointer;background:var(--card);color:var(--fg);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:rgba(201,164,92,.25);touch-action:manipulation;transition:border-color .15s,background .15s,color .15s;user-select:none}
+.size-btn.active{border-color:var(--coral)!important;background:var(--coral)!important;color:var(--ink)!important}
 .color-swatches{display:flex;flex-wrap:wrap;gap:.5rem}
 .swatch{width:2.5rem;height:2.5rem;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:border-color .2s;touch-action:manipulation}
 .swatch.active{border-color:var(--coral)}
@@ -124,7 +125,7 @@ label{font-size:.8rem;font-weight:600;margin-bottom:.35rem;display:block;color:v
 .form-row{display:grid;gap:.65rem}
 @media(min-width:480px){.form-row.col2{grid-template-columns:1fr 1fr}}
 .pay-opt{border:2px solid var(--border);border-radius:var(--rad);padding:.85rem 1rem;cursor:pointer;text-align:left;transition:var(--trans);background:var(--card);width:100%;touch-action:manipulation}
-.pay-opt.active{border-color:var(--coral);background:rgba(255,84,112,.05)}
+.pay-opt.active{border-color:var(--coral);background:rgba(201,164,92,.08)}
 .pay-opt-label{font-weight:700;font-size:.85rem}
 .pay-opt-hint{font-size:.72rem;color:var(--muted);margin-top:.15rem}
 .success-screen{text-align:center;max-width:30rem;margin:0 auto;padding:4rem 1rem}
@@ -170,7 +171,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
 .admin-header .wrap{display:flex;align-items:center;justify-content:space-between}
 .admin-nav{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem}
 .admin-tab{padding:.5rem 1rem;border-radius:var(--rad-full);font-size:.8rem;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--fg);cursor:pointer;touch-action:manipulation}
-.admin-tab.active{background:var(--coral);color:white;border-color:var(--coral)}
+.admin-tab.active{background:var(--coral);color:var(--ink);border-color:var(--coral)}
 .admin-section{display:none}.admin-section.active{display:block}
 .product-admin-card{border:1px solid var(--border);border-radius:var(--rad);padding:1rem;display:flex;gap:.85rem;align-items:flex-start;margin-bottom:.75rem}
 .product-admin-img{width:5rem;height:6rem;flex-shrink:0;border-radius:.65rem;overflow:hidden;background:var(--g100);display:flex;align-items:center;justify-content:center;font-size:1.5rem}
@@ -179,7 +180,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
 .media-preview-item{position:relative;width:5rem;height:6rem;border-radius:.65rem;overflow:hidden;background:var(--g100);cursor:grab}
 .media-preview-item img,.media-preview-item video{width:100%;height:100%;object-fit:cover}
 .media-remove{position:absolute;top:.2rem;right:.2rem;width:1.4rem;height:1.4rem;background:rgba(22,24,29,.8);border-radius:50%;color:white;display:flex;align-items:center;justify-content:center;font-size:.65rem;cursor:pointer;border:none}
-.capa-label{position:absolute;bottom:0;left:0;right:0;background:var(--coral);color:white;font-size:.55rem;font-weight:700;text-align:center;padding:.15rem}
+.capa-label{position:absolute;bottom:0;left:0;right:0;background:var(--coral);color:var(--ink);font-size:.55rem;font-weight:700;text-align:center;padding:.15rem}
 .order-card{border:1px solid var(--border);border-radius:var(--rad);padding:1rem;margin-bottom:.75rem}
 .tag{display:inline-flex;align-items:center;border-radius:var(--rad-full);border:2px solid var(--border);padding:.3rem .7rem;font-size:.75rem;font-weight:700;cursor:pointer;background:transparent;color:var(--fg);touch-action:manipulation;min-height:2.2rem}
 .tag.active{background:var(--ink);color:var(--bone);border-color:transparent}
@@ -266,7 +267,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
     <div class="wrap">
       <div class="hero-grid">
         <div>
-          <span class="eyebrow">Bem-vindo a TRAMA</span>
+          <span class="eyebrow">Moda masculina • São Félix do Xingu</span>
           <h1 class="font-display display-xl" style="margin-top:.5rem;color:var(--bone)">Veja, escolha,<br><span style="color:var(--lime)">confirme no WhatsApp.</span></h1>
           <p style="margin-top:1rem;color:#A8A7A1;line-height:1.6;max-width:26rem">Moda em São Félix do Xingu. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire com a gente. Respondemos rápido!</p>
           <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem">
@@ -358,7 +359,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
         <!-- PROVADOR INLINE -->
         <div class="provador-box">
           <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem">
-            <span style="font-size:1.3rem">👗</span>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7v4M10 7v3M14 7v4M18 7v3"/></svg>
             <div>
               <div style="font-weight:800;font-size:.9rem">Provador Virtual</div>
               <div style="font-size:.72rem;color:var(--muted)">Descubra seu tamanho pelas suas medidas</div>
@@ -374,7 +375,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
               <input class="field" type="number" id="il-peso" placeholder="Ex.: 65" style="padding:.5rem .75rem;font-size:.82rem"/>
             </div>
             <div>
-              <label style="font-size:.72rem">Busto/Peito (cm)</label>
+              <label style="font-size:.72rem">Peito (cm)</label>
               <input class="field" type="number" id="il-busto" placeholder="Ex.: 90" style="padding:.5rem .75rem;font-size:.82rem"/>
             </div>
             <div>
@@ -385,8 +386,8 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
           <div style="margin-bottom:.65rem">
             <label style="font-size:.72rem">Genero</label>
             <select class="field" id="il-genero" style="padding:.5rem .75rem;font-size:.82rem">
-              <option value="feminino">Feminino</option>
               <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
               <option value="neutro">Neutro/Unissex</option>
             </select>
           </div>
@@ -509,13 +510,13 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
         <div class="medidas-grid" style="margin-bottom:.75rem">
           <div><label>Altura (cm)</label><input class="field" type="number" id="pv-altura" placeholder="Ex.: 170" min="140" max="220"/></div>
           <div><label>Peso (kg)</label><input class="field" type="number" id="pv-peso" placeholder="Ex.: 65" min="40" max="200"/></div>
-          <div><label>Busto/Peito (cm)</label><input class="field" type="number" id="pv-busto" placeholder="Ex.: 90" min="60" max="160"/></div>
+          <div><label>Peito (cm)</label><input class="field" type="number" id="pv-busto" placeholder="Ex.: 90" min="60" max="160"/></div>
           <div><label>Cintura (cm)</label><input class="field" type="number" id="pv-cintura" placeholder="Ex.: 70" min="50" max="150"/></div>
           <div><label>Quadril (cm)</label><input class="field" type="number" id="pv-quadril" placeholder="Ex.: 95" min="60" max="160"/></div>
           <div><label>Genero</label>
             <select class="field" id="pv-genero">
-              <option value="feminino">Feminino</option>
               <option value="masculino">Masculino</option>
+              <option value="feminino">Feminino</option>
               <option value="neutro">Neutro/Unissex</option>
             </select>
           </div>
@@ -769,7 +770,7 @@ var DEF = [
 
 var PRODS = [];
 var cart = JSON.parse(localStorage.getItem('trama.cart') || '[]');
-var isDark = localStorage.getItem('trama.theme') === 'dark';
+var isDark = localStorage.getItem('trama.theme') !== 'light';
 var curProd = null, curView = 'home', curCat = null;
 var prodQty = 1, prodSize = null, prodColor = null, curPay = 'pix';
 var editId = null, tmpMedia = [];
@@ -932,7 +933,7 @@ function renderProdData(p) {
         rows += '<tr><td>' + sn + '</td><td>' + (row.b || '-') + '</td><td>' + (row.c || '-') + '</td><td>' + (row.q || '-') + '</td><td>' + (row.l || '-') + '</td></tr>';
       }
     }
-    scTable.innerHTML = '<table class="medidas-table"><thead><tr><th>Tam</th><th>Busto</th><th>Cintura</th><th>Quadril</th><th>Comp.</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    scTable.innerHTML = '<table class="medidas-table"><thead><tr><th>Tam</th><th>Peito</th><th>Cintura</th><th>Quadril</th><th>Comp.</th></tr></thead><tbody>' + rows + '</tbody></table>';
     scEl.style.display = 'block';
   } else {
     scEl.style.display = 'none';
@@ -1044,7 +1045,7 @@ function pedirAjudaTam() {
 }
 // Confere se as medidas digitadas sao possiveis
 function medErro(d) {
-  var lim = { a: [120, 220, 'Altura'], p: [30, 250, 'Peso'], b: [60, 170, 'Busto/Peito'], c: [45, 170, 'Cintura'], q: [60, 180, 'Quadril'] };
+  var lim = { a: [120, 220, 'Altura'], p: [30, 250, 'Peso'], b: [60, 170, 'Peito'], c: [45, 170, 'Cintura'], q: [60, 180, 'Quadril'] };
   for (var k in lim) {
     if (!d[k]) continue;
     var x = +d[k];
@@ -1071,7 +1072,7 @@ function recSize(prod, d) {
   if (best) {
     var fonte = padrao ? 'a tabela padrão de tamanhos ' + (g === 'feminino' ? 'feminina' : 'masculina') : 'a tabela de medidas deste produto';
     // Confere se alguma medida do cliente passa da medida do tamanho escolhido
-    var rb = sc[best], nomes = { b: 'seu busto/peito', c: 'sua cintura', q: 'seu quadril' }, cli = { b: b, c: c, q: q }, passa = [];
+    var rb = sc[best], nomes = { b: 'seu peito', c: 'sua cintura', q: 'seu quadril' }, cli = { b: b, c: c, q: q }, passa = [];
     ['b', 'c', 'q'].forEach(function(k) { if (cli[k] && rb[k] && cli[k] > rb[k]) passa.push(nomes[k] + ' (' + cli[k] + ' cm) passa da medida do ' + best + ' (' + rb[k] + ' cm)'); });
     var maior = sizes.filter(function(z) { return sc[z]; }).pop() === best;
     if (passa.length) return { size: best, alerta: true, why: 'Comparamos suas medidas com ' + fonte + '. O ' + best + ' é ' + (maior ? 'o maior tamanho disponível' : 'o mais indicado') + ', mas ' + passa.join(' e ') + '.<div style="color:var(--coral);font-weight:700;margin-top:.4rem">Atenção: a peça pode ficar justa. Fale com a gente no WhatsApp antes de comprar.</div>' };
@@ -1103,7 +1104,7 @@ function calcInline() {
   var er = medErro(d); if (er) { document.getElementById('il-result').innerHTML = '<div style="border:1px solid var(--coral);border-radius:.75rem;padding:.75rem;font-size:.83rem;color:var(--coral);font-weight:600">' + er + '</div>'; return; }
   var r = recSize(curProd, d);
   pvUltimo = { nome: curProd.name, d: d, size: r.size };
-  document.getElementById('il-result').innerHTML = '<div style="background:rgba(180,255,57,.12);border:1px solid #B4FF39;border-radius:.75rem;padding:.75rem;font-size:.83rem;line-height:1.6"><div style="font-weight:800;font-size:1rem">Tamanho recomendado: ' + r.size + '</div>' + r.why + '</div>' + BTN_AJUDA;
+  document.getElementById('il-result').innerHTML = '<div style="background:rgba(201,164,92,.12);border:1px solid var(--coral);border-radius:.75rem;padding:.75rem;font-size:.83rem;line-height:1.6"><div style="font-weight:800;font-size:1rem">Tamanho recomendado: ' + r.size + '</div>' + r.why + '</div>' + BTN_AJUDA;
   var sb = document.querySelectorAll('#prod-sizes .size-btn');
   for (var i = 0; i < sb.length; i++) if (sb[i].textContent.trim() === r.size) { selSize(r.size, sb[i]); break; }
 }
