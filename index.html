@@ -434,11 +434,6 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
                 <div><label>E-mail</label><input class="field" type="email" id="co-email" placeholder="seu@email.com"/></div>
                 <div><label>WhatsApp</label><input class="field" type="tel" id="co-tel" placeholder="(94) 99999-9999"/></div>
               </div>
-              <div id="co-end-wrap" style="display:flex;flex-direction:column;gap:.75rem">
-                <div><label>Bairro</label><input class="field" type="text" id="co-bairro" placeholder="Seu bairro"/></div>
-                <div><label>Endereço e ponto de referência</label><input class="field" type="text" id="co-end" placeholder="Rua, número, referência..."/></div>
-                <p style="font-size:.75rem;color:var(--muted);line-height:1.5">Entregamos somente em São Félix do Xingu - PA. A taxa de entrega é combinada pelo WhatsApp, conforme o bairro.</p>
-              </div>
             </div>
           </fieldset>
           <fieldset style="border:none">
@@ -447,6 +442,11 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
               <button type="button" class="pay-opt active" id="rec-entrega" onclick="selRec('entrega')"><div class="pay-opt-label">Entrega em casa</div><div class="pay-opt-hint">Em São Félix do Xingu. Taxa combinada pelo WhatsApp</div></button>
               <button type="button" class="pay-opt" id="rec-retirada" onclick="selRec('retirada')"><div class="pay-opt-label">Retirar na loja</div><div class="pay-opt-hint">Combinamos o local e o horário pelo WhatsApp</div></button>
               <button type="button" class="pay-opt" id="rec-visita" onclick="selRec('visita')"><div class="pay-opt-label">Visita para provar em casa</div><div class="pay-opt-hint">Levamos até 6 peças, você prova e paga só o que ficar. Sem custo</div></button>
+            </div>
+            <div id="co-end-wrap" style="display:flex;flex-direction:column;gap:.75rem;margin-top:.85rem">
+              <div><label>Bairro</label><input class="field" type="text" id="co-bairro" placeholder="Seu bairro"/></div>
+              <div><label>Endereço e ponto de referência</label><input class="field" type="text" id="co-end" placeholder="Rua, número, referência..."/></div>
+              <p style="font-size:.75rem;color:var(--muted);line-height:1.5">Entregamos somente em São Félix do Xingu - PA. A taxa de entrega é combinada pelo WhatsApp, conforme o bairro.</p>
             </div>
             <div id="visita-wrap" style="display:none;margin-top:.85rem;flex-direction:column;gap:.65rem">
               <div class="form-row col2">
