@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>TRAMA Luxury | Loja online</title>
-<meta name="description" content="TRAMA Luxury: escolha suas pecas no site, confirme pelo WhatsApp e retire na sua cidade. Pague no Pix ou na entrega."/>
+<title>TRAMA Luxury | Moda em São Félix do Xingu</title>
+<meta name="description" content="TRAMA Luxury, loja de roupas em São Félix do Xingu - PA. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire na loja. Pix ou pagamento na entrega."/>
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="TRAMA Luxury"/>
-<meta property="og:description" content="Escolha suas pecas no site e confirme pelo WhatsApp. Pix ou pagamento na entrega."/>
+<meta property="og:description" content="Moda em São Félix do Xingu. Escolha no site, confirme pelo WhatsApp e receba em casa."/>
 <meta property="og:image" content="https://trama-loja.vercel.app/WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg"/>
 <meta property="og:url" content="https://trama-loja.vercel.app/"/>
 <meta name="twitter:card" content="summary_large_image"/>
@@ -186,17 +186,18 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
 .dark .tag.active{background:var(--lime);color:var(--ink)}
 </style>
 <link rel="icon" type="image/jpeg" href="WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ClothingStore","name":"TRAMA Luxury","url":"https://trama-loja.vercel.app/","image":"https://trama-loja.vercel.app/WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg","telephone":"+55-94-98155-2665","areaServed":"São Félix do Xingu","address":{"@type":"PostalAddress","addressLocality":"São Félix do Xingu","addressRegion":"PA","addressCountry":"BR"}}</script>
 </head>
 <body>
 
 <div id="promo-bar">
   <div class="marquee-track">
     <span class="marquee-item">COMPRE PELO SITE E CONFIRME NO WHATSAPP &nbsp;✦&nbsp;</span>
-    <span class="marquee-item">RETIRE NA SUA CIDADE &nbsp;✦&nbsp;</span>
+    <span class="marquee-item">ENTREGA E RETIRADA EM SÃO FÉLIX DO XINGU &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PAGUE NA ENTREGA OU PIX &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PROVADOR VIRTUAL DISPONIVEL &nbsp;✦&nbsp;</span>
     <span class="marquee-item">COMPRE PELO SITE E CONFIRME NO WHATSAPP &nbsp;✦&nbsp;</span>
-    <span class="marquee-item">RETIRE NA SUA CIDADE &nbsp;✦&nbsp;</span>
+    <span class="marquee-item">ENTREGA E RETIRADA EM SÃO FÉLIX DO XINGU &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PAGUE NA ENTREGA OU PIX &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PROVADOR VIRTUAL DISPONIVEL &nbsp;✦&nbsp;</span>
   </div>
@@ -263,7 +264,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
         <div>
           <span class="eyebrow">Bem-vindo a TRAMA</span>
           <h1 class="font-display display-xl" style="margin-top:.5rem;color:var(--bone)">Veja, escolha,<br><span style="color:var(--lime)">confirme no WhatsApp.</span></h1>
-          <p style="margin-top:1rem;color:#A8A7A1;line-height:1.6;max-width:26rem">Escolha seus produtos. Confirme pelo WhatsApp, retire na sua cidade.</p>
+          <p style="margin-top:1rem;color:#A8A7A1;line-height:1.6;max-width:26rem">Moda em São Félix do Xingu. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire na loja.</p>
           <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem">
             <button class="btn btn-primary" onclick="nav('cat','camisetas')">Ver produtos</button>
             <button class="btn" style="background:transparent;color:var(--lime);border:2px solid var(--lime)" onclick="nav('provador')">Provador Virtual</button>
@@ -429,7 +430,18 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
                 <div><label>E-mail</label><input class="field" type="email" id="co-email" placeholder="seu@email.com"/></div>
                 <div><label>WhatsApp</label><input class="field" type="tel" id="co-tel" placeholder="(94) 99999-9999"/></div>
               </div>
-              <div><label>Endereco ou referencia</label><input class="field" type="text" id="co-end" placeholder="Rua, numero, bairro..."/></div>
+              <div id="co-end-wrap" style="display:flex;flex-direction:column;gap:.75rem">
+                <div><label>Bairro</label><input class="field" type="text" id="co-bairro" placeholder="Seu bairro"/></div>
+                <div><label>Endereço e ponto de referência</label><input class="field" type="text" id="co-end" placeholder="Rua, número, referência..."/></div>
+                <p style="font-size:.75rem;color:var(--muted);line-height:1.5">Entregamos somente em São Félix do Xingu - PA. A taxa de entrega é combinada pelo WhatsApp, conforme o bairro.</p>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset style="border:none">
+            <legend style="font-family:'Anton',sans-serif;font-size:1.2rem;text-transform:uppercase;margin-bottom:1rem">Como receber</legend>
+            <div style="display:flex;flex-direction:column;gap:.5rem">
+              <button type="button" class="pay-opt active" id="rec-entrega" onclick="selRec('entrega')"><div class="pay-opt-label">Entrega em casa</div><div class="pay-opt-hint">Em São Félix do Xingu. Taxa combinada pelo WhatsApp</div></button>
+              <button type="button" class="pay-opt" id="rec-retirada" onclick="selRec('retirada')"><div class="pay-opt-label">Retirar na loja</div><div class="pay-opt-hint">Combinamos o local e o horário pelo WhatsApp</div></button>
             </div>
           </fieldset>
           <fieldset style="border:none">
@@ -657,6 +669,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
       <div class="footer-col">
         <span class="logo" style="font-size:1.5rem;display:block;margin-bottom:.65rem">TRAMA</span>
         <p>Moda com identidade, atendimento pessoal.</p>
+        <p>São Félix do Xingu - PA</p>
       </div>
       <div class="footer-col">
         <h4>Categorias</h4>
@@ -1070,12 +1083,19 @@ function selPay(t) {
     if (el) el.classList.toggle('active', opts[i] === t);
   }
 }
+var curRec = 'entrega';
+function selRec(t) {
+  curRec = t;
+  ['entrega', 'retirada'].forEach(function(o) { var el = document.getElementById('rec-' + o); if (el) el.classList.toggle('active', o === t); });
+  document.getElementById('co-end-wrap').style.display = t === 'entrega' ? 'flex' : 'none';
+}
 function doWhatsapp() {
   var nome = document.getElementById('co-nome').value.trim();
   var tel = document.getElementById('co-tel').value.trim();
   var end = document.getElementById('co-end').value.trim();
   var email = document.getElementById('co-email').value.trim();
-  if (!nome || !tel || !end) { toast('Preencha todos os campos!'); return; }
+  var bairro = document.getElementById('co-bairro').value.trim();
+  if (!nome || !tel || (curRec === 'entrega' && (!end || !bairro))) { toast('Preencha todos os campos!'); return; }
   if (cart.length === 0) { toast('Sacola vazia!'); return; }
   var sub = 0; for (var i = 0; i < cart.length; i++) sub += cart[i].price * cart[i].qty;
   var itxt = cart.map(function(i) { return '* ' + i.name + ' (Tam ' + i.size + (i.color ? ', ' + i.color : '') + ') x' + i.qty + ' = ' + brl(i.price * i.qty); }).join('%0A');
@@ -1087,10 +1107,10 @@ function doWhatsapp() {
     '%0A%0A*DADOS:*%0ANome: ' + encodeURIComponent(nome) +
     '%0AWhatsApp: ' + encodeURIComponent(tel) +
     (email ? '%0AEmail: ' + encodeURIComponent(email) : '') +
-    '%0AEndereco: ' + encodeURIComponent(end);
+    (curRec === 'retirada' ? '%0A*Recebimento:* ' + encodeURIComponent('Retirada na loja') : '%0A*Recebimento:* ' + encodeURIComponent('Entrega em São Félix do Xingu (taxa a combinar)') + '%0ABairro: ' + encodeURIComponent(bairro) + '%0AEndereco: ' + encodeURIComponent(end));
   var btn = document.getElementById('co-btn');
   btn.textContent = 'Abrindo...'; btn.disabled = true;
-  dbIns('orders', { id: 'PED-' + Date.now(), nome: nome, email: email, tel: tel, endereco: end, items: cart, total: sub, payment: pay, status: 'pendente', created_at: new Date().toISOString() });
+  dbIns('orders', { id: 'PED-' + Date.now(), nome: nome, email: email, tel: tel, endereco: curRec === 'retirada' ? 'RETIRADA NA LOJA' : (bairro + ' - ' + end), items: cart, total: sub, payment: pay, status: 'pendente', created_at: new Date().toISOString() });
   setTimeout(function() {
     window.open('https://wa.me/' + getWA() + '?text=' + msg, '_blank');
     cart = []; localStorage.setItem('trama.cart', '[]'); updateCartUI();
