@@ -194,13 +194,13 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
   <div class="marquee-track">
     <span class="marquee-item">COMPRE PELO SITE E CONFIRME NO WHATSAPP &nbsp;✦&nbsp;</span>
     <span class="marquee-item">ENTREGA E RETIRADA EM SÃO FÉLIX DO XINGU &nbsp;✦&nbsp;</span>
-    <span class="marquee-item">PAGUE NA ENTREGA OU PIX &nbsp;✦&nbsp;</span>
+    <span class="marquee-item">10% OFF NO PIX &nbsp;✦&nbsp;</span>
     <span class="marquee-item">RESPONDEMOS RÁPIDO NO WHATSAPP &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PROVADOR VIRTUAL DISPONIVEL &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PROVE EM CASA SEM COMPROMISSO &nbsp;✦&nbsp;</span>
     <span class="marquee-item">COMPRE PELO SITE E CONFIRME NO WHATSAPP &nbsp;✦&nbsp;</span>
     <span class="marquee-item">ENTREGA E RETIRADA EM SÃO FÉLIX DO XINGU &nbsp;✦&nbsp;</span>
-    <span class="marquee-item">PAGUE NA ENTREGA OU PIX &nbsp;✦&nbsp;</span>
+    <span class="marquee-item">10% OFF NO PIX &nbsp;✦&nbsp;</span>
     <span class="marquee-item">RESPONDEMOS RÁPIDO NO WHATSAPP &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PROVADOR VIRTUAL DISPONIVEL &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PROVE EM CASA SEM COMPROMISSO &nbsp;✦&nbsp;</span>
@@ -324,6 +324,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
           <span style="font-size:1.75rem;font-weight:800" id="prod-price"></span>
           <span style="font-size:.9rem;color:var(--g400);text-decoration:line-through;display:none" id="prod-oldprice"></span>
         </div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--coral);margin:-.9rem 0 1.25rem" id="prod-pix"></div>
         <div style="margin-bottom:1.25rem">
           <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.5rem">Cor: <span id="prod-color-label" style="color:var(--fg);text-transform:none"></span></div>
           <div class="color-swatches" id="prod-colors"></div>
@@ -461,7 +462,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
           <fieldset style="border:none">
             <legend style="font-family:'Anton',sans-serif;font-size:1.2rem;text-transform:uppercase;margin-bottom:1rem">Pagamento</legend>
             <div style="display:flex;flex-direction:column;gap:.5rem">
-              <button type="button" class="pay-opt active" id="pay-pix" onclick="selPay('pix')"><div class="pay-opt-label">Pix</div><div class="pay-opt-hint">Desconto especial</div></button>
+              <button type="button" class="pay-opt active" id="pay-pix" onclick="selPay('pix')"><div class="pay-opt-label">Pix</div><div class="pay-opt-hint">10% de desconto no total</div></button>
               <button type="button" class="pay-opt" id="pay-entrega" onclick="selPay('entrega')"><div class="pay-opt-label">Na entrega/retirada</div><div class="pay-opt-hint">Pague quando receber</div></button>
             </div>
           </fieldset>
@@ -470,6 +471,8 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
           <h2 class="font-display" style="font-size:1.1rem;margin-bottom:1rem">Resumo do pedido</h2>
           <div id="co-items" style="display:flex;flex-direction:column;gap:.65rem;max-height:14rem;overflow-y:auto;margin-bottom:1rem"></div>
           <div style="border-top:1px solid var(--border);padding-top:.85rem">
+            <div id="co-desc-line" style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:.35rem"><span>Subtotal</span><span id="co-sub">R$ 0,00</span></div>
+            <div id="co-desc-line2" style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;color:var(--coral);margin-bottom:.5rem"><span>Desconto Pix (10%)</span><span id="co-desc">- R$ 0,00</span></div>
             <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.15rem;margin-bottom:1rem"><span>Total</span><span id="co-total">R$ 0,00</span></div>
             <button class="btn btn-lime" style="width:100%;padding:1rem" id="co-btn" onclick="doWhatsapp()">Enviar pelo WhatsApp</button>
             <p style="text-align:center;font-size:.7rem;color:var(--muted);margin-top:.6rem">Voce sera direcionado para conversar comigo</p>
@@ -875,6 +878,7 @@ function renderProdData(p) {
   document.getElementById('prod-bc').innerHTML = '<a href="#" onclick="nav(\'home\');return false">Inicio</a> / <a href="#" onclick="nav(\'cat\',\'' + p.category + '\');return false">' + (CATS[p.category] || p.category) + '</a> / <span>' + p.name + '</span>';
   document.getElementById('prod-name').textContent = p.name;
   document.getElementById('prod-price').textContent = brl(p.price);
+  document.getElementById('prod-pix').textContent = 'ou ' + brl(p.price * (1 - PIX_DESC)) + ' no Pix (10% off)';
   var op = document.getElementById('prod-oldprice');
   if (p.old_price || p.oldPrice) { op.textContent = brl(p.old_price || p.oldPrice); op.style.display = 'inline'; } else op.style.display = 'none';
 
@@ -1103,7 +1107,22 @@ function renderCheckout() {
       '<div style="color:var(--muted)">Tam ' + item.size + ' x' + item.qty + '</div>' +
       '<div style="font-weight:700">' + brl(item.price * item.qty) + '</div></div></div>';
   }).join('');
-  document.getElementById('co-total').textContent = brl(sub);
+  updateCoTotals();
+}
+// Desconto no Pix (0.10 = 10%). Para mudar o desconto, altere so este numero.
+var PIX_DESC = 0.10;
+function cartTotals() {
+  var sub = 0; for (var i = 0; i < cart.length; i++) sub += cart[i].price * cart[i].qty;
+  var desc = curPay === 'pix' ? Math.round(sub * PIX_DESC * 100) / 100 : 0;
+  return { sub: sub, desc: desc, total: sub - desc };
+}
+function updateCoTotals() {
+  var t = cartTotals();
+  document.getElementById('co-sub').textContent = brl(t.sub);
+  document.getElementById('co-desc').textContent = '- ' + brl(t.desc);
+  document.getElementById('co-desc-line').style.display = t.desc ? 'flex' : 'none';
+  document.getElementById('co-desc-line2').style.display = t.desc ? 'flex' : 'none';
+  document.getElementById('co-total').textContent = brl(t.total);
 }
 function selPay(t) {
   curPay = t;
@@ -1112,6 +1131,7 @@ function selPay(t) {
     var el = document.getElementById('pay-' + opts[i]);
     if (el) el.classList.toggle('active', opts[i] === t);
   }
+  if (document.getElementById('co-total')) updateCoTotals();
 }
 var curRec = 'entrega';
 var DIAS = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
@@ -1159,7 +1179,7 @@ function doWhatsapp() {
     var dd = dia.split('-');
     visTxt = dd[2] + '/' + dd[1] + ' (' + DIAS[new Date(dia + 'T00:00:00').getDay()] + ') as ' + hora + 'h';
   }
-  var sub = 0; for (var i = 0; i < cart.length; i++) sub += cart[i].price * cart[i].qty;
+  var tt = cartTotals(), sub = tt.sub;
   var itxt = cart.map(function(i) { return '* ' + i.name + ' (Tam ' + i.size + (i.color ? ', ' + i.color : '') + ') x' + i.qty + ' = ' + brl(i.price * i.qty); }).join('%0A');
   var pay = curPay === 'pix' ? 'Pix' : 'Na entrega/retirada';
   var rec = curRec === 'retirada' ? '%0A*Recebimento:* ' + encodeURIComponent('Retirada com a gente (combinar horario)')
@@ -1167,7 +1187,8 @@ function doWhatsapp() {
     : '%0A*Recebimento:* ' + encodeURIComponent('Entrega em São Félix do Xingu (taxa a combinar)') + '%0ABairro: ' + encodeURIComponent(bairro) + '%0AEndereco: ' + encodeURIComponent(end);
   var msg = encodeURIComponent(curRec === 'visita' ? 'Ola! Quero agendar uma visita para provar estas pecas em casa' : 'Ola! Quero confirmar meu pedido na TRAMA') +
     '%0A%0A*' + (curRec === 'visita' ? 'PECAS PARA PROVAR' : 'PEDIDO') + ':*%0A' + itxt +
-    '%0A%0A*TOTAL' + (curRec === 'visita' ? ' (se ficar com tudo)' : '') + ': ' + brl(sub) + '*' +
+    (tt.desc ? '%0A%0ASubtotal: ' + brl(tt.sub) + '%0A' + encodeURIComponent('Desconto Pix (10%): - ') + brl(tt.desc) : '%0A') +
+    '%0A*TOTAL' + (curRec === 'visita' ? ' (se ficar com tudo)' : '') + ': ' + brl(tt.total) + '*' +
     '%0A*Pagamento:* ' + pay +
     '%0A%0A*DADOS:*%0ANome: ' + encodeURIComponent(nome) +
     '%0AWhatsApp: ' + encodeURIComponent(tel) +
@@ -1175,7 +1196,7 @@ function doWhatsapp() {
   var btn = document.getElementById('co-btn');
   btn.textContent = 'Abrindo...'; btn.disabled = true;
   var endReg = curRec === 'retirada' ? 'RETIRADA' : curRec === 'visita' ? ('VISITA ' + visTxt + ' - ' + bairro + ' - ' + end) : (bairro + ' - ' + end);
-  db('orders', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ id: 'PED-' + Date.now(), nome: nome, email: email, tel: tel, endereco: endReg, items: cart, total: sub, payment: pay, status: 'pendente', created_at: new Date().toISOString() }) });
+  db('orders', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ id: 'PED-' + Date.now(), nome: nome, email: email, tel: tel, endereco: endReg, items: cart, total: tt.total, payment: pay, status: 'pendente', created_at: new Date().toISOString() }) });
   setTimeout(function() {
     window.open('https://wa.me/' + getWA() + '?text=' + msg, '_blank');
     cart = []; localStorage.setItem('trama.cart', '[]'); updateCartUI();
