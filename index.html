@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>TRAMA</title>
+<title>TRAMA Luxury | Loja online</title>
+<meta name="description" content="TRAMA Luxury: escolha suas pecas no site, confirme pelo WhatsApp e retire na sua cidade. Pague no Pix ou na entrega."/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="TRAMA Luxury"/>
+<meta property="og:description" content="Escolha suas pecas no site e confirme pelo WhatsApp. Pix ou pagamento na entrega."/>
+<meta property="og:image" content="https://trama-loja.vercel.app/WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg"/>
+<meta property="og:url" content="https://trama-loja.vercel.app/"/>
+<meta name="twitter:card" content="summary_large_image"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -70,6 +77,7 @@ label{font-size:.8rem;font-weight:600;margin-bottom:.35rem;display:block;color:v
 @media(min-width:1024px){.hero-grid{grid-template-columns:1fr 1fr}}
 .hero-img-box{aspect-ratio:4/5;border-radius:1.25rem;overflow:hidden;background:var(--g700);display:flex;align-items:center;justify-content:center}
 .hero-img-box img,.hero-img-box video{width:100%;height:100%;object-fit:cover}
+@media(max-width:1023px){.hero-img-box{max-width:15rem;aspect-ratio:1/1;margin:0 auto}}
 .product-card{position:relative;cursor:pointer}
 .product-image{aspect-ratio:4/5;border-radius:var(--rad);overflow:hidden;background:var(--g100);position:relative}
 .dark .product-image{background:var(--g800)}
@@ -674,7 +682,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
   </div>
 </footer>
 
-<a id="wa-btn" href="https://wa.me/5594981552665" target="_blank">chat</a>
+<a id="wa-btn" href="https://wa.me/5594981552665" target="_blank" aria-label="Falar no WhatsApp"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg></a>
 <div id="toast"></div>
 
 <script>
@@ -784,7 +792,8 @@ function renderHome() {
     var best = PRODS.filter(function(p) { return (p.tags || []).indexOf('mais-vendido') > -1; }).slice(0, 4);
     var news = PRODS.filter(function(p) { return (p.tags || []).indexOf('novo') > -1; }).slice(0, 4);
     document.getElementById('home-bestsellers').innerHTML = (best.length ? best : PRODS.slice(0, 4)).map(cardHTML).join('');
-    document.getElementById('home-news').innerHTML = news.length ? news.map(cardHTML).join('') : '';
+    var hn = document.getElementById('home-news'); hn.innerHTML = news.length ? news.map(cardHTML).join('') : '';
+    var hnT = hn.previousElementSibling, hnE = hnT && hnT.previousElementSibling; [hnT, hnE].forEach(function(e) { if (e) e.style.display = news.length ? '' : 'none'; });
   });
 }
 
@@ -927,7 +936,18 @@ function selColor(c, btn) {
   var all = document.querySelectorAll('#prod-colors .swatch');
   for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
   btn.classList.add('active');
+  // Mostra a foto na mesma posicao da cor (1a cor = 1a foto, 2a cor = 2a foto...)
+  var idx = (curProd.colors || []).indexOf(c);
+  var m = (curProd.media || [])[idx];
+  if (!m) return;
+  var th = document.querySelectorAll('#gallery-thumbs .thumb');
+  if (th[idx]) { selThumb(th[idx], gsrc(m), isvid(m) ? 1 : 0); return; }
+  var src = gsrc(m), v = isvid(m), main = document.getElementById('gallery-main');
+  lbSrc = src; lbVid = v;
+  main.innerHTML = v ? '<video src="' + src + '" muted autoplay loop playsinline style="width:100%;height:100%;object-fit:cover"></video>' : '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover"/>';
+  if (!v) setupZoom(main, src);
 }
+
 function selSize(s, btn) {
   prodSize = s;
   var all = document.querySelectorAll('.size-btn');
@@ -942,48 +962,55 @@ function addToCart() {
   var key = curProd.id + '__' + prodSize + '__' + (prodColor || '');
   var ex = null;
   for (var i = 0; i < cart.length; i++) { if (cart[i].key === key) { ex = cart[i]; break; } }
-  if (ex) ex.quantity += prodQty;
+  if (ex) ex.qty += prodQty;
   else cart.push({ key: key, id: curProd.id, name: curProd.name, price: curProd.price, size: prodSize, color: prodColor, qty: prodQty, media: curProd.media || [] });
   localStorage.setItem('trama.cart', JSON.stringify(cart));
   updateCartUI(); toast('Adicionado a sacola!');
 }
 function buyNow() { if (!prodSize) { document.getElementById('prod-size-error').textContent = 'Escolha um tamanho!'; return; } addToCart(); nav('checkout'); }
 
+function recSize(prod, d) {
+  var sizes = prod.sizes || [];
+  if (!sizes.length) return { size: 'M', why: 'Este produto nao tem tamanhos cadastrados.' };
+  if (sizes.length === 1) return { size: sizes[0], why: 'Este produto tem tamanho unico.' };
+  var a = +d.a, p = +d.p, b = +d.b || 0, c = +d.c || 0, q = +d.q || 0, g = d.g;
+  var sc = prod.size_chart || {};
+  // 1) Pela tabela de medidas do produto
+  var best = null, bestScore = 1e9;
+  sizes.forEach(function(sz) {
+    var r = sc[sz]; if (!r) return;
+    var sc2 = 0, n = 0;
+    [[b, r.b], [c, r.c], [q, r.q]].forEach(function(x) { if (x[0] && x[1]) { var df = x[1] - x[0]; sc2 += df < 0 ? -df * 3 : df; n++; } });
+    if (n && sc2 / n < bestScore) { bestScore = sc2 / n; best = sz; }
+  });
+  if (best) return { size: best, why: 'Comparamos suas medidas com a tabela de medidas deste produto. O ' + best + ' e o que fica mais proximo sem apertar.' };
+  // 2) Numeracao (calcas 34-50) pela cintura ou peso
+  var nums = sizes.map(Number).filter(function(x) { return !isNaN(x); }).sort(function(x, y) { return x - y; });
+  if (nums.length === sizes.length) {
+    var cin = c || (g === 'masculino' ? p * 0.45 + 47 : p * 0.5 + 38);
+    var alvo = Math.round((cin - 74) / 4) * 2 + 38;
+    var esc = nums.reduce(function(x, y) { return Math.abs(y - alvo) < Math.abs(x - alvo) ? y : x; });
+    return { size: String(esc), why: (c ? 'Pela sua cintura de ' + c + ' cm' : 'Pela estimativa de cintura a partir do seu peso') + ', a numeracao indicada e ' + esc + '.' };
+  }
+  // 3) Estimativa por peso e altura
+  var ord = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
+  var lim = g === 'masculino' ? [52, 62, 74, 86, 98] : [48, 56, 65, 75, 88];
+  var i = 0; while (i < lim.length && p > lim[i]) i++;
+  if (a >= 185 && i < 5) i++;
+  if (b && b >= (g === 'masculino' ? 110 : 104) && i < 5) i++;
+  var disp = sizes.filter(function(s) { return ord.indexOf(s) > -1; });
+  if (!disp.length) return { size: sizes[0], why: 'Nao foi possivel comparar com a numeracao deste produto.' };
+  var pick = disp.reduce(function(x, y) { return Math.abs(ord.indexOf(y) - i) < Math.abs(ord.indexOf(x) - i) ? y : x; });
+  return { size: pick, why: 'Estimativa pelo seu peso (' + p + ' kg) e altura (' + a + ' cm). Para mais precisao, peca a tabela de medidas no WhatsApp.' };
+}
 function calcInline() {
   if (!curProd) return;
-  var a = document.getElementById('il-altura').value;
-  var p = document.getElementById('il-peso').value;
-  var b = document.getElementById('il-busto').value;
-  var c = document.getElementById('il-cintura').value;
-  var g = document.getElementById('il-genero').value;
-  if (!a || !p) { toast('Informe altura e peso!'); return; }
-  var btn = document.getElementById('btn-il');
-  btn.disabled = true; btn.textContent = 'Analisando...';
-  var r = document.getElementById('il-result');
-  r.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)">calculando...</div>';
-
-  var sc = curProd.size_chart || {};
-  var scInfo = '';
-  var sns = ['PP','P','M','G','GG','XG'];
-  for (var si = 0; si < sns.length; si++) {
-    var sn = sns[si];
-    if (sc[sn]) { var row = sc[sn]; scInfo += sn + ':busto=' + (row.b || '?') + 'cm,cintura=' + (row.c || '?') + 'cm. '; }
-  }
-
-  var prompt = 'Especialista em moda. Produto: ' + curProd.name + '. Tamanhos: ' + (curProd.sizes || []).join(',') + '. ' + (scInfo ? 'Tabela: ' + scInfo : '') + ' Cliente: genero=' + g + ' altura=' + a + 'cm peso=' + p + 'kg busto=' + (b || '?') + 'cm cintura=' + (c || '?') + 'cm. Recomende o tamanho em 3 linhas: 1)Tamanho recomendado 2)Justificativa 3)Dica. Responda em portugues.';
-
-  fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 300, messages: [{ role: 'user', content: prompt }] })
-  }).then(function(res) { return res.json(); }).then(function(data) {
-    var txt = data.content && data.content[0] ? data.content[0].text : 'Tamanho M recomendado para suas medidas.';
-    r.innerHTML = '<div style="background:rgba(180,255,57,.12);border:1px solid #B4FF39;border-radius:.75rem;padding:.75rem;font-size:.83rem;line-height:1.6">' + txt + '</div>';
-    btn.disabled = false; btn.textContent = 'Calcular novamente';
-  }).catch(function() {
-    r.innerHTML = '<div style="background:rgba(180,255,57,.12);border:1px solid #B4FF39;border-radius:.75rem;padding:.75rem;font-size:.83rem">Tamanho recomendado: M. Para suas medidas, o M oferece o melhor caimento.</div>';
-    btn.disabled = false; btn.textContent = 'Calcular novamente';
-  });
+  var d = { a: document.getElementById('il-altura').value, p: document.getElementById('il-peso').value, b: document.getElementById('il-busto').value, c: document.getElementById('il-cintura').value, g: document.getElementById('il-genero').value };
+  if (!d.a || !d.p) { toast('Informe altura e peso!'); return; }
+  var r = recSize(curProd, d);
+  document.getElementById('il-result').innerHTML = '<div style="background:rgba(180,255,57,.12);border:1px solid #B4FF39;border-radius:.75rem;padding:.75rem;font-size:.83rem;line-height:1.6"><div style="font-weight:800;font-size:1rem">Tamanho recomendado: ' + r.size + '</div>' + r.why + '</div>';
+  var sb = document.querySelectorAll('#prod-sizes .size-btn');
+  for (var i = 0; i < sb.length; i++) if (sb[i].textContent.trim() === r.size) { selSize(r.size, sb[i]); break; }
 }
 
 function updateCartUI() {
@@ -1099,46 +1126,17 @@ function selPvProd(id, el) {
 }
 function calcProv() {
   if (!pvProd) { toast('Selecione um produto primeiro!'); return; }
-  var a = document.getElementById('pv-altura').value;
-  var p = document.getElementById('pv-peso').value;
-  var b = document.getElementById('pv-busto').value;
-  var c = document.getElementById('pv-cintura').value;
-  var q = document.getElementById('pv-quadril').value;
-  var g = document.getElementById('pv-genero').value;
-  if (!a || !p) { toast('Informe altura e peso!'); return; }
-  var btn = document.getElementById('btn-pv');
-  btn.disabled = true; btn.textContent = 'Analisando...';
-  var res = document.getElementById('pv-result');
-  res.innerHTML = '<div class="loading"><div class="spinner"></div>calculando...</div>';
-
-  var sc = pvProd.size_chart || {};
-  var scInfo = '';
-  var sns = ['PP','P','M','G','GG','XG'];
-  for (var si = 0; si < sns.length; si++) {
-    var sn = sns[si];
-    if (sc[sn]) { var row = sc[sn]; scInfo += sn + ':busto=' + (row.b || '?') + ',cintura=' + (row.c || '?') + ',quadril=' + (row.q || '?') + '. '; }
-  }
-
-  var prompt = 'Especialista em moda. Produto: ' + pvProd.name + (pvProd.description ? ' - ' + pvProd.description : '') + '. Tamanhos disponiveis: ' + (pvProd.sizes || []).join(',') + '. ' + (scInfo ? 'Tabela do produto: ' + scInfo : '') + ' Medidas do cliente: genero=' + g + ' altura=' + a + 'cm peso=' + p + 'kg busto=' + (b || 'nao informado') + 'cm cintura=' + (c || 'nao informado') + 'cm quadril=' + (q || 'nao informado') + 'cm. Recomende o tamanho ideal em portugues com: 1)Tamanho recomendado em destaque 2)Justificativa 3)Como vai ficar 4)Dica de uso.';
-
-  fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
-  }).then(function(res2) { return res2.json(); }).then(function(data) {
-    var txt = data.content && data.content[0] ? data.content[0].text : 'Tamanho M recomendado para suas medidas.';
-    var m0 = (pvProd.media || [])[0]; var ps = m0 ? gsrc(m0) : ''; var pv = m0 ? isvid(m0) : false;
-    res.innerHTML = '<div class="card">' +
-      '<div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">' +
-      (ps ? '<div style="width:5rem;height:6rem;flex-shrink:0;border-radius:.65rem;overflow:hidden;background:var(--g100)">' + (pv ? '<video src="' + ps + '" muted autoplay loop playsinline style="width:100%;height:100%;object-fit:cover"></video>' : '<img src="' + ps + '" style="width:100%;height:100%;object-fit:cover"/>') + '</div>' : '') +
-      '<div><div style="font-size:.7rem;color:var(--coral);font-weight:700;text-transform:uppercase">Resultado</div><div style="font-weight:800;font-size:1rem">' + pvProd.name + '</div><div style="font-size:.78rem;color:var(--muted)">' + a + 'cm - ' + p + 'kg - ' + g + '</div></div></div>' +
-      '<div style="font-size:.88rem;line-height:1.8">' + txt + '</div>' +
-      '<div style="display:flex;gap:.5rem;margin-top:1rem"><button class="btn btn-lime" style="flex:1" onclick="nav(\'product\',\'' + pvProd.id + '\')">Ver produto</button><button class="btn btn-primary" style="flex:1" onclick="nav(\'cart\')">Ir para sacola</button></div></div>';
-    btn.disabled = false; btn.textContent = 'Calcular novamente';
-  }).catch(function() {
-    res.innerHTML = '<div class="card"><div style="font-weight:700;margin-bottom:.5rem">' + pvProd.name + '</div><div style="font-size:.85rem;color:var(--muted)">Com base nas suas medidas (' + a + 'cm, ' + p + 'kg), recomendamos o tamanho M para um caimento confortavel.</div><button class="btn btn-primary" style="width:100%;margin-top:1rem" onclick="nav(\'product\',\'' + pvProd.id + '\')">Ver produto</button></div>';
-    btn.disabled = false; btn.textContent = 'Calcular novamente';
-  });
+  var d = { a: document.getElementById('pv-altura').value, p: document.getElementById('pv-peso').value, b: document.getElementById('pv-busto').value, c: document.getElementById('pv-cintura').value, q: document.getElementById('pv-quadril').value, g: document.getElementById('pv-genero').value };
+  if (!d.a || !d.p) { toast('Informe altura e peso!'); return; }
+  var r = recSize(pvProd, d);
+  var m0 = (pvProd.media || [])[0]; var ps = m0 ? gsrc(m0) : ''; var pv = m0 ? isvid(m0) : false;
+  document.getElementById('pv-result').innerHTML = '<div class="card">' +
+    '<div style="display:flex;gap:1rem;align-items:flex-start;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)">' +
+    (ps ? '<div style="width:5rem;height:6rem;flex-shrink:0;border-radius:.65rem;overflow:hidden;background:var(--g100)">' + (pv ? '<video src="' + ps + '" muted autoplay loop playsinline style="width:100%;height:100%;object-fit:cover"></video>' : '<img src="' + ps + '" style="width:100%;height:100%;object-fit:cover"/>') + '</div>' : '') +
+    '<div><div style="font-size:.7rem;color:var(--coral);font-weight:700;text-transform:uppercase">Resultado</div><div style="font-weight:800;font-size:1rem">' + pvProd.name + '</div><div style="font-size:.78rem;color:var(--muted)">' + d.a + 'cm - ' + d.p + 'kg</div></div></div>' +
+    '<div style="font-size:1.4rem;font-weight:800;margin-bottom:.35rem">Tamanho recomendado: ' + r.size + '</div>' +
+    '<div style="font-size:.88rem;line-height:1.7;color:var(--muted)">' + r.why + '</div>' +
+    '<div style="display:flex;gap:.5rem;margin-top:1rem"><button class="btn btn-lime" style="flex:1" onclick="nav(\'product\',\'' + pvProd.id + '\')">Ver produto</button><button class="btn btn-primary" style="flex:1" onclick="nav(\'cart\')">Ir para sacola</button></div></div>';
 }
 
 function openAdmin() {
