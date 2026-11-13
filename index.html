@@ -533,7 +533,8 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
     <h2 class="font-display" style="font-size:1.5rem;margin-bottom:.25rem">Admin</h2>
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:1.5rem">Area restrita</p>
     <div style="display:flex;flex-direction:column;gap:.65rem">
-      <input class="field" type="password" id="admin-pwd" placeholder="Senha" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
+      <input class="field" type="email" id="admin-email" placeholder="E-mail" autocomplete="username"/>
+      <input class="field" type="password" id="admin-pwd" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
       <button class="btn btn-primary" onclick="doAdminLogin()">Entrar</button>
       <button class="btn btn-ghost btn-sm" onclick="closeAdminLogin()">Cancelar</button>
     </div>
@@ -668,8 +669,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
       <div style="max-width:32rem;display:flex;flex-direction:column;gap:.75rem">
         <div><label>Seu WhatsApp</label><input class="field" type="text" id="cfg-wa" placeholder="5594981552665"/></div>
         <div><label>E-mail</label><input class="field" type="email" id="cfg-email" placeholder="contato@trama.com.br"/></div>
-        <div><label>Nova senha admin (deixe vazio para nao alterar)</label><input class="field" type="password" id="cfg-pwd" placeholder="Nova senha"/></div>
-        <button class="btn btn-primary" style="align-self:flex-start" onclick="saveConfig()">Salvar</button>
+                <button class="btn btn-primary" style="align-self:flex-start" onclick="saveConfig()">Salvar</button>
       </div>
     </div>
   </div>
@@ -714,8 +714,24 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
 var SUPA_URL = 'https://rgxdjyxfqclmzmtcprfc.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJneGRqeXhmcWNsbXptdGNwcmZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU2MjE3NTAsImV4cCI6MjEwMTE5Nzc1MH0.ZHztnrT4BPGm_9pnZ_COfYPW7RnD3IXGDPIxlZDLQyc';
 
+// Login do Admin pelo Supabase Auth. O token vai nas requisicoes para o banco liberar pedidos e edicoes.
+function getAuth() { try { return JSON.parse(sessionStorage.getItem('trama.auth') || 'null'); } catch (e) { return null; } }
+function setAuth(a) { if (a && a.access_token) sessionStorage.setItem('trama.auth', JSON.stringify({ t: a.access_token, r: a.refresh_token, exp: Date.now() + (a.expires_in || 3600) * 1000 })); else sessionStorage.removeItem('trama.auth'); }
+function authCall(grant, body) {
+  return fetch(SUPA_URL + '/auth/v1/token?grant_type=' + grant, { method: 'POST', headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(function(r) { return r.json().then(function(j) { return r.ok ? j : Promise.reject(j); }); });
+}
+function ensureAuth() {
+  var a = getAuth();
+  if (!a) return Promise.resolve(null);
+  if (Date.now() < a.exp - 60000) return Promise.resolve(a.t);
+  return authCall('refresh_token', { refresh_token: a.r }).then(function(j) { setAuth(j); return j.access_token; }, function() { setAuth(null); return null; });
+}
 function db(path, opts) {
-  var h = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+  return ensureAuth().then(function(tok) { return dbRaw(path, opts, tok); });
+}
+function dbRaw(path, opts, tok) {
+  var h = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + (tok || SUPA_KEY), 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
   if (opts && opts.headers) { for (var k in opts.headers) h[k] = opts.headers[k]; }
   var o = { headers: h };
   if (opts) { if (opts.method) o.method = opts.method; if (opts.body) o.body = opts.body; }
@@ -751,7 +767,6 @@ var pvProd = null;
 var dragIdx = null;
 
 function getWA() { return localStorage.getItem('trama.wa') || '5594981552665'; }
-function getAdminPwd() { return localStorage.getItem('trama.apwd') || 'trama2026'; }
 
 function applyTheme() {
   document.documentElement.classList.toggle('dark', isDark);
@@ -1158,7 +1173,7 @@ function doWhatsapp() {
   var btn = document.getElementById('co-btn');
   btn.textContent = 'Abrindo...'; btn.disabled = true;
   var endReg = curRec === 'retirada' ? 'RETIRADA NA LOJA' : curRec === 'visita' ? ('VISITA ' + visTxt + ' - ' + bairro + ' - ' + end) : (bairro + ' - ' + end);
-  dbIns('orders', { id: 'PED-' + Date.now(), nome: nome, email: email, tel: tel, endereco: endReg, items: cart, total: sub, payment: pay, status: 'pendente', created_at: new Date().toISOString() });
+  db('orders', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ id: 'PED-' + Date.now(), nome: nome, email: email, tel: tel, endereco: endReg, items: cart, total: sub, payment: pay, status: 'pendente', created_at: new Date().toISOString() }) });
   setTimeout(function() {
     window.open('https://wa.me/' + getWA() + '?text=' + msg, '_blank');
     cart = []; localStorage.setItem('trama.cart', '[]'); updateCartUI();
@@ -1208,19 +1223,24 @@ function calcProv() {
 }
 
 function openAdmin() {
-  if (sessionStorage.getItem('trama.adm') === 'ok') { showAdmin(); return; }
+  if (getAuth()) { ensureAuth().then(function(t) { if (t) showAdmin(); else openAdmin(); }); return; }
   document.getElementById('admin-login').classList.remove('hidden');
   document.getElementById('admin-error').textContent = '';
   document.getElementById('admin-pwd').value = '';
-  setTimeout(function() { document.getElementById('admin-pwd').focus(); }, 100);
+  setTimeout(function() { document.getElementById('admin-email').focus(); }, 100);
 }
 function doAdminLogin() {
-  var pwd = document.getElementById('admin-pwd').value;
-  if (pwd === getAdminPwd()) { sessionStorage.setItem('trama.adm', 'ok'); document.getElementById('admin-login').classList.add('hidden'); showAdmin(); }
-  else document.getElementById('admin-error').textContent = 'Senha incorreta.';
+  var email = document.getElementById('admin-email').value.trim(), pwd = document.getElementById('admin-pwd').value;
+  var err = document.getElementById('admin-error');
+  if (!email || !pwd) { err.textContent = 'Informe e-mail e senha.'; return; }
+  err.textContent = 'Entrando...';
+  authCall('password', { email: email, password: pwd }).then(function(j) {
+    setAuth(j); err.textContent = '';
+    document.getElementById('admin-login').classList.add('hidden'); showAdmin();
+  }, function() { err.textContent = 'E-mail ou senha incorretos.'; });
 }
 function closeAdminLogin() { document.getElementById('admin-login').classList.add('hidden'); nav('home'); }
-function doAdminLogout() { sessionStorage.removeItem('trama.adm'); nav('home'); }
+function doAdminLogout() { setAuth(null); sessionStorage.removeItem('trama.adm'); nav('home'); }
 
 function showAdmin() {
   var all = document.querySelectorAll('.view');
@@ -1391,15 +1411,12 @@ function updOrder(id, status) { dbUpd('orders', id, { status: status }); }
 function loadConfig() {
   document.getElementById('cfg-wa').value = getWA();
   document.getElementById('cfg-email').value = localStorage.getItem('trama.email') || '';
-  document.getElementById('cfg-pwd').value = '';
 }
 function saveConfig() {
   var wa = document.getElementById('cfg-wa').value.trim();
   var email = document.getElementById('cfg-email').value.trim();
-  var pwd = document.getElementById('cfg-pwd').value;
   if (wa) { localStorage.setItem('trama.wa', wa); document.getElementById('wa-btn').href = 'https://wa.me/' + wa; document.getElementById('footer-wa').href = 'https://wa.me/' + wa; }
   if (email) localStorage.setItem('trama.email', email);
-  if (pwd) localStorage.setItem('trama.apwd', pwd);
   toast('Configuracoes salvas!');
 }
 
