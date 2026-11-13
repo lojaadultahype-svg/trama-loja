@@ -1042,13 +1042,23 @@ function pedirAjudaTam() {
   var txt = 'Ola! Quero ajuda para escolher o tamanho de: ' + pvUltimo.nome + '.\nMinhas medidas: ' + med + '.\nO provador do site indicou: ' + pvUltimo.size + '.';
   window.open('https://wa.me/' + getWA() + '?text=' + encodeURIComponent(txt), '_blank');
 }
+// Confere se as medidas digitadas sao possiveis
+function medErro(d) {
+  var lim = { a: [120, 220, 'Altura'], p: [30, 250, 'Peso'], b: [60, 170, 'Busto/Peito'], c: [45, 170, 'Cintura'], q: [60, 180, 'Quadril'] };
+  for (var k in lim) {
+    if (!d[k]) continue;
+    var x = +d[k];
+    if (isNaN(x) || x < lim[k][0] || x > lim[k][1]) return lim[k][2] + ' parece incorreto(a). Use um valor entre ' + lim[k][0] + ' e ' + lim[k][1] + (k === 'p' ? ' kg.' : ' cm.');
+  }
+  return '';
+}
 function recSize(prod, d) {
   var sizes = prod.sizes || [];
-  if (!sizes.length) return { size: 'M', why: 'Este produto nao tem tamanhos cadastrados.' };
-  if (sizes.length === 1) return { size: sizes[0], why: 'Este produto tem tamanho unico.' };
+  if (!sizes.length) return { size: 'M', why: 'Este produto não tem tamanhos cadastrados.' };
+  if (sizes.length === 1) return { size: sizes[0], why: 'Este produto tem tamanho único.' };
   var a = +d.a, p = +d.p, b = +d.b || 0, c = +d.c || 0, q = +d.q || 0, g = d.g;
   var sc = prod.size_chart || {}, padrao = false;
-  // Sem tabela no produto: usa a tabela padrao brasileira de medidas do corpo
+  // Sem tabela no produto: usa a tabela padrão brasileira de medidas do corpo
   if (!sizes.some(function(z) { return sc[z] && (sc[z].b || sc[z].c || sc[z].q); })) { sc = TAB_PADRAO[g === 'feminino' ? 'f' : 'm']; padrao = true; }
   // 1) Pela tabela de medidas
   var best = null, bestScore = 1e9;
@@ -1058,14 +1068,14 @@ function recSize(prod, d) {
     [[b, r.b], [c, r.c], [q, r.q]].forEach(function(x) { if (x[0] && x[1]) { var df = x[1] - x[0]; sc2 += df < 0 ? -df * 3 : df; n++; } });
     if (n && sc2 / n < bestScore) { bestScore = sc2 / n; best = sz; }
   });
-  if (best) return { size: best, why: padrao ? 'Comparamos suas medidas com a tabela padrao de tamanhos ' + (g === 'feminino' ? 'feminina' : 'masculina') + '. O ' + best + ' e o que fica mais proximo sem apertar.' : 'Comparamos suas medidas com a tabela de medidas deste produto. O ' + best + ' e o que fica mais proximo sem apertar.' };
+  if (best) return { size: best, why: padrao ? 'Comparamos suas medidas com a tabela padrão de tamanhos ' + (g === 'feminino' ? 'feminina' : 'masculina') + '. O ' + best + ' é o que fica mais próximo sem apertar.' : 'Comparamos suas medidas com a tabela de medidas deste produto. O ' + best + ' é o que fica mais próximo sem apertar.' };
   // 2) Numeracao (calcas 34-50) pela cintura ou peso
   var nums = sizes.map(Number).filter(function(x) { return !isNaN(x); }).sort(function(x, y) { return x - y; });
   if (nums.length === sizes.length) {
     var cin = c || (g === 'masculino' ? p * 0.45 + 47 : p * 0.5 + 38);
     var alvo = Math.round((cin - 74) / 4) * 2 + 38;
     var esc = nums.reduce(function(x, y) { return Math.abs(y - alvo) < Math.abs(x - alvo) ? y : x; });
-    return { size: String(esc), why: (c ? 'Pela sua cintura de ' + c + ' cm' : 'Pela estimativa de cintura a partir do seu peso') + ', a numeracao indicada e ' + esc + '.' };
+    return { size: String(esc), why: (c ? 'Pela sua cintura de ' + c + ' cm' : 'Pela estimativa da sua cintura a partir do peso') + ', a numeração indicada é ' + esc + '.' };
   }
   // 3) Estimativa por peso e altura
   var ord = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
@@ -1074,14 +1084,15 @@ function recSize(prod, d) {
   if (a >= 185 && i < 5) i++;
   if (b && b >= (g === 'masculino' ? 110 : 104) && i < 5) i++;
   var disp = sizes.filter(function(s) { return ord.indexOf(s) > -1; });
-  if (!disp.length) return { size: sizes[0], why: 'Nao foi possivel comparar com a numeracao deste produto.' };
+  if (!disp.length) return { size: sizes[0], why: 'Não foi possível comparar com a numeração deste produto.' };
   var pick = disp.reduce(function(x, y) { return Math.abs(ord.indexOf(y) - i) < Math.abs(ord.indexOf(x) - i) ? y : x; });
-  return { size: pick, why: 'Estimativa pelo seu peso (' + p + ' kg) e altura (' + a + ' cm). Para mais precisao, peca a tabela de medidas no WhatsApp.' };
+  return { size: pick, why: 'Estimativa pelo seu peso (' + p + ' kg) e altura (' + a + ' cm). Para mais precisão, informe busto e cintura ou peça ajuda no WhatsApp.' };
 }
 function calcInline() {
   if (!curProd) return;
   var d = { a: document.getElementById('il-altura').value, p: document.getElementById('il-peso').value, b: document.getElementById('il-busto').value, c: document.getElementById('il-cintura').value, g: document.getElementById('il-genero').value };
   if (!d.a || !d.p) { toast('Informe altura e peso!'); return; }
+  var er = medErro(d); if (er) { document.getElementById('il-result').innerHTML = '<div style="border:1px solid var(--coral);border-radius:.75rem;padding:.75rem;font-size:.83rem;color:var(--coral);font-weight:600">' + er + '</div>'; return; }
   var r = recSize(curProd, d);
   pvUltimo = { nome: curProd.name, d: d, size: r.size };
   document.getElementById('il-result').innerHTML = '<div style="background:rgba(180,255,57,.12);border:1px solid #B4FF39;border-radius:.75rem;padding:.75rem;font-size:.83rem;line-height:1.6"><div style="font-weight:800;font-size:1rem">Tamanho recomendado: ' + r.size + '</div>' + r.why + '</div>' + BTN_AJUDA;
@@ -1263,6 +1274,7 @@ function calcProv() {
   if (!pvProd) { toast('Selecione um produto primeiro!'); return; }
   var d = { a: document.getElementById('pv-altura').value, p: document.getElementById('pv-peso').value, b: document.getElementById('pv-busto').value, c: document.getElementById('pv-cintura').value, q: document.getElementById('pv-quadril').value, g: document.getElementById('pv-genero').value };
   if (!d.a || !d.p) { toast('Informe altura e peso!'); return; }
+  var er = medErro(d); if (er) { document.getElementById('pv-result').innerHTML = '<div class="card" style="border-color:var(--coral);color:var(--coral);font-weight:600;font-size:.88rem">' + er + '</div>'; return; }
   var r = recSize(pvProd, d);
   pvUltimo = { nome: pvProd.name, d: d, size: r.size };
   var m0 = (pvProd.media || [])[0]; var ps = m0 ? gsrc(m0) : ''; var pv = m0 ? isvid(m0) : false;
