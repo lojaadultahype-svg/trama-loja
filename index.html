@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>TRAMA Luxury | Moda em São Félix do Xingu</title>
-<meta name="description" content="TRAMA Luxury, loja de roupas em São Félix do Xingu - PA. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire na loja. Pix ou pagamento na entrega."/>
+<meta name="description" content="TRAMA Luxury, loja de roupas em São Félix do Xingu - PA. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire com a gente. Pix ou pagamento na entrega."/>
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="TRAMA Luxury"/>
 <meta property="og:description" content="Moda em São Félix do Xingu. Escolha no site, confirme pelo WhatsApp e receba em casa."/>
@@ -195,11 +195,13 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
     <span class="marquee-item">COMPRE PELO SITE E CONFIRME NO WHATSAPP &nbsp;✦&nbsp;</span>
     <span class="marquee-item">ENTREGA E RETIRADA EM SÃO FÉLIX DO XINGU &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PAGUE NA ENTREGA OU PIX &nbsp;✦&nbsp;</span>
+    <span class="marquee-item">RESPONDEMOS RÁPIDO NO WHATSAPP &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PROVADOR VIRTUAL DISPONIVEL &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PROVE EM CASA SEM COMPROMISSO &nbsp;✦&nbsp;</span>
     <span class="marquee-item">COMPRE PELO SITE E CONFIRME NO WHATSAPP &nbsp;✦&nbsp;</span>
     <span class="marquee-item">ENTREGA E RETIRADA EM SÃO FÉLIX DO XINGU &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PAGUE NA ENTREGA OU PIX &nbsp;✦&nbsp;</span>
+    <span class="marquee-item">RESPONDEMOS RÁPIDO NO WHATSAPP &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PROVADOR VIRTUAL DISPONIVEL &nbsp;✦&nbsp;</span>
     <span class="marquee-item">PROVE EM CASA SEM COMPROMISSO &nbsp;✦&nbsp;</span>
   </div>
@@ -266,7 +268,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
         <div>
           <span class="eyebrow">Bem-vindo a TRAMA</span>
           <h1 class="font-display display-xl" style="margin-top:.5rem;color:var(--bone)">Veja, escolha,<br><span style="color:var(--lime)">confirme no WhatsApp.</span></h1>
-          <p style="margin-top:1rem;color:#A8A7A1;line-height:1.6;max-width:26rem">Moda em São Félix do Xingu. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire na loja.</p>
+          <p style="margin-top:1rem;color:#A8A7A1;line-height:1.6;max-width:26rem">Moda em São Félix do Xingu. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire com a gente. Respondemos rápido!</p>
           <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem">
             <button class="btn btn-primary" onclick="nav('cat','camisetas')">Ver produtos</button>
             <button class="btn" style="background:transparent;color:var(--lime);border:2px solid var(--lime)" onclick="nav('provador')">Provador Virtual</button>
@@ -440,7 +442,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
             <legend style="font-family:'Anton',sans-serif;font-size:1.2rem;text-transform:uppercase;margin-bottom:1rem">Como receber</legend>
             <div style="display:flex;flex-direction:column;gap:.5rem">
               <button type="button" class="pay-opt active" id="rec-entrega" onclick="selRec('entrega')"><div class="pay-opt-label">Entrega em casa</div><div class="pay-opt-hint">Em São Félix do Xingu. Taxa combinada pelo WhatsApp</div></button>
-              <button type="button" class="pay-opt" id="rec-retirada" onclick="selRec('retirada')"><div class="pay-opt-label">Retirar na loja</div><div class="pay-opt-hint">Combinamos o local e o horário pelo WhatsApp</div></button>
+              <button type="button" class="pay-opt" id="rec-retirada" onclick="selRec('retirada')"><div class="pay-opt-label">Retirar com a gente</div><div class="pay-opt-hint">Em São Félix do Xingu, no horário que for melhor para você. Combinamos pelo WhatsApp</div></button>
               <button type="button" class="pay-opt" id="rec-visita" onclick="selRec('visita')"><div class="pay-opt-label">Visita para provar em casa</div><div class="pay-opt-hint">Levamos até 6 peças, você prova e paga só o que ficar. Sem custo</div></button>
             </div>
             <div id="co-end-wrap" style="display:flex;flex-direction:column;gap:.75rem;margin-top:.85rem">
@@ -1160,7 +1162,7 @@ function doWhatsapp() {
   var sub = 0; for (var i = 0; i < cart.length; i++) sub += cart[i].price * cart[i].qty;
   var itxt = cart.map(function(i) { return '* ' + i.name + ' (Tam ' + i.size + (i.color ? ', ' + i.color : '') + ') x' + i.qty + ' = ' + brl(i.price * i.qty); }).join('%0A');
   var pay = curPay === 'pix' ? 'Pix' : 'Na entrega/retirada';
-  var rec = curRec === 'retirada' ? '%0A*Recebimento:* ' + encodeURIComponent('Retirada na loja')
+  var rec = curRec === 'retirada' ? '%0A*Recebimento:* ' + encodeURIComponent('Retirada com a gente (combinar horario)')
     : curRec === 'visita' ? '%0A*Recebimento:* ' + encodeURIComponent('Visita para provar em casa') + '%0A*Visita:* ' + encodeURIComponent(visTxt) + '%0ABairro: ' + encodeURIComponent(bairro) + '%0AEndereco: ' + encodeURIComponent(end)
     : '%0A*Recebimento:* ' + encodeURIComponent('Entrega em São Félix do Xingu (taxa a combinar)') + '%0ABairro: ' + encodeURIComponent(bairro) + '%0AEndereco: ' + encodeURIComponent(end);
   var msg = encodeURIComponent(curRec === 'visita' ? 'Ola! Quero agendar uma visita para provar estas pecas em casa' : 'Ola! Quero confirmar meu pedido na TRAMA') +
@@ -1172,7 +1174,7 @@ function doWhatsapp() {
     (email ? '%0AEmail: ' + encodeURIComponent(email) : '') + rec;
   var btn = document.getElementById('co-btn');
   btn.textContent = 'Abrindo...'; btn.disabled = true;
-  var endReg = curRec === 'retirada' ? 'RETIRADA NA LOJA' : curRec === 'visita' ? ('VISITA ' + visTxt + ' - ' + bairro + ' - ' + end) : (bairro + ' - ' + end);
+  var endReg = curRec === 'retirada' ? 'RETIRADA' : curRec === 'visita' ? ('VISITA ' + visTxt + ' - ' + bairro + ' - ' + end) : (bairro + ' - ' + end);
   db('orders', { method: 'POST', headers: { 'Prefer': 'return=minimal' }, body: JSON.stringify({ id: 'PED-' + Date.now(), nome: nome, email: email, tel: tel, endereco: endReg, items: cart, total: sub, payment: pay, status: 'pendente', created_at: new Date().toISOString() }) });
   setTimeout(function() {
     window.open('https://wa.me/' + getWA() + '?text=' + msg, '_blank');
