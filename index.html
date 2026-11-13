@@ -642,7 +642,11 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
                 </tbody>
               </table>
             </div>
-            <p style="font-size:.72rem;color:var(--muted)">Deixe em branco o que nao se aplica.</p>
+            <p style="font-size:.72rem;color:var(--muted)">Deixe em branco o que nao se aplica. Sem tabela, o Provador usa as medidas padrao.</p>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="fillPadrao('f')">Preencher padrao feminino</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="fillPadrao('m')">Preencher padrao masculino</button>
+            </div>
           </div>
           <div>
             <label>Fotos e Videos (links do Cloudinary)</label>
@@ -1016,13 +1020,27 @@ function addToCart() {
 function tryAtHome() { if (!prodSize) { document.getElementById('prod-size-error').textContent = 'Escolha um tamanho!'; return; } addToCart(); nav('checkout'); selRec('visita'); }
 function buyNow() { if (!prodSize) { document.getElementById('prod-size-error').textContent = 'Escolha um tamanho!'; return; } addToCart(); nav('checkout'); }
 
+// Tabela padrao de medidas do corpo (cm): limite maximo de busto/torax (b), cintura (c) e quadril (q) de cada tamanho
+var TAB_PADRAO = {
+  f: { PP: { b: 84, c: 66, q: 92 }, P: { b: 88, c: 70, q: 96 }, M: { b: 92, c: 74, q: 100 }, G: { b: 98, c: 80, q: 106 }, GG: { b: 104, c: 86, q: 112 }, XG: { b: 110, c: 92, q: 118 } },
+  m: { PP: { b: 88, c: 74, q: 90 }, P: { b: 92, c: 78, q: 94 }, M: { b: 98, c: 84, q: 100 }, G: { b: 104, c: 90, q: 106 }, GG: { b: 110, c: 96, q: 112 }, XG: { b: 116, c: 102, q: 118 } }
+};
+function fillPadrao(gen) {
+  var t = TAB_PADRAO[gen];
+  ['PP', 'P', 'M', 'G', 'GG', 'XG'].forEach(function(sz) {
+    ['b', 'c', 'q'].forEach(function(f) { var el = document.getElementById('ch-' + sz + '-' + f); if (el) el.value = t[sz][f]; });
+  });
+  toast('Tabela padrao ' + (gen === 'f' ? 'feminina' : 'masculina') + ' preenchida!');
+}
 function recSize(prod, d) {
   var sizes = prod.sizes || [];
   if (!sizes.length) return { size: 'M', why: 'Este produto nao tem tamanhos cadastrados.' };
   if (sizes.length === 1) return { size: sizes[0], why: 'Este produto tem tamanho unico.' };
   var a = +d.a, p = +d.p, b = +d.b || 0, c = +d.c || 0, q = +d.q || 0, g = d.g;
-  var sc = prod.size_chart || {};
-  // 1) Pela tabela de medidas do produto
+  var sc = prod.size_chart || {}, padrao = false;
+  // Sem tabela no produto: usa a tabela padrao brasileira de medidas do corpo
+  if (!sizes.some(function(z) { return sc[z] && (sc[z].b || sc[z].c || sc[z].q); })) { sc = TAB_PADRAO[g === 'feminino' ? 'f' : 'm']; padrao = true; }
+  // 1) Pela tabela de medidas
   var best = null, bestScore = 1e9;
   sizes.forEach(function(sz) {
     var r = sc[sz]; if (!r) return;
@@ -1030,7 +1048,7 @@ function recSize(prod, d) {
     [[b, r.b], [c, r.c], [q, r.q]].forEach(function(x) { if (x[0] && x[1]) { var df = x[1] - x[0]; sc2 += df < 0 ? -df * 3 : df; n++; } });
     if (n && sc2 / n < bestScore) { bestScore = sc2 / n; best = sz; }
   });
-  if (best) return { size: best, why: 'Comparamos suas medidas com a tabela de medidas deste produto. O ' + best + ' e o que fica mais proximo sem apertar.' };
+  if (best) return { size: best, why: padrao ? 'Comparamos suas medidas com a tabela padrao de tamanhos ' + (g === 'feminino' ? 'feminina' : 'masculina') + '. O ' + best + ' e o que fica mais proximo sem apertar.' : 'Comparamos suas medidas com a tabela de medidas deste produto. O ' + best + ' e o que fica mais proximo sem apertar.' };
   // 2) Numeracao (calcas 34-50) pela cintura ou peso
   var nums = sizes.map(Number).filter(function(x) { return !isNaN(x); }).sort(function(x, y) { return x - y; });
   if (nums.length === sizes.length) {
