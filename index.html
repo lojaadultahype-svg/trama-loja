@@ -1068,7 +1068,15 @@ function recSize(prod, d) {
     [[b, r.b], [c, r.c], [q, r.q]].forEach(function(x) { if (x[0] && x[1]) { var df = x[1] - x[0]; sc2 += df < 0 ? -df * 3 : df; n++; } });
     if (n && sc2 / n < bestScore) { bestScore = sc2 / n; best = sz; }
   });
-  if (best) return { size: best, why: padrao ? 'Comparamos suas medidas com a tabela padrão de tamanhos ' + (g === 'feminino' ? 'feminina' : 'masculina') + '. O ' + best + ' é o que fica mais próximo sem apertar.' : 'Comparamos suas medidas com a tabela de medidas deste produto. O ' + best + ' é o que fica mais próximo sem apertar.' };
+  if (best) {
+    var fonte = padrao ? 'a tabela padrão de tamanhos ' + (g === 'feminino' ? 'feminina' : 'masculina') : 'a tabela de medidas deste produto';
+    // Confere se alguma medida do cliente passa da medida do tamanho escolhido
+    var rb = sc[best], nomes = { b: 'busto/peito', c: 'cintura', q: 'quadril' }, cli = { b: b, c: c, q: q }, passa = [];
+    ['b', 'c', 'q'].forEach(function(k) { if (cli[k] && rb[k] && cli[k] > rb[k]) passa.push('sua ' + nomes[k] + ' (' + cli[k] + ' cm) passa da medida do ' + best + ' (' + rb[k] + ' cm)'); });
+    var maior = sizes.filter(function(z) { return sc[z]; }).pop() === best;
+    if (passa.length) return { size: best, alerta: true, why: 'Comparamos suas medidas com ' + fonte + '. O ' + best + ' é ' + (maior ? 'o maior tamanho disponível' : 'o mais indicado') + ', mas ' + passa.join(' e ') + '.<div style="color:var(--coral);font-weight:700;margin-top:.4rem">Atenção: a peça pode ficar justa. Fale com a gente no WhatsApp antes de comprar.</div>' };
+    return { size: best, why: 'Comparamos suas medidas com ' + fonte + '. O ' + best + ' é o que fica mais próximo sem apertar.' };
+  }
   // 2) Numeracao (calcas 34-50) pela cintura ou peso
   var nums = sizes.map(Number).filter(function(x) { return !isNaN(x); }).sort(function(x, y) { return x - y; });
   if (nums.length === sizes.length) {
