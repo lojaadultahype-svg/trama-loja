@@ -31,6 +31,8 @@ input,select,textarea{font-family:inherit}
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
 @media(min-width:768px){.grid4{grid-template-columns:repeat(4,1fr)}}
 .view{display:none}.view.active{display:block}
+.buybar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:35;background:var(--bg);border-top:1px solid var(--border);padding:.65rem 1rem calc(.65rem + env(safe-area-inset-bottom));align-items:center;justify-content:space-between;gap:.75rem;box-shadow:0 -6px 24px rgba(0,0,0,.25)}
+@media(max-width:767px){body.on-prod .buybar{display:flex}body.on-prod #wa-btn{bottom:5.25rem}body.on-prod footer{padding-bottom:5rem}}
 .play-ic{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:3rem;height:3rem;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;pointer-events:none;backdrop-filter:blur(4px)}
 .snd-btn{position:absolute;right:.75rem;bottom:.75rem;z-index:3;display:flex;align-items:center;gap:.4rem;padding:.55rem .85rem;border-radius:999px;border:none;background:rgba(0,0,0,.65);color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;backdrop-filter:blur(6px)}
 .size-btn.esgotado{opacity:.35;text-decoration:line-through;cursor:not-allowed}
@@ -335,7 +337,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
         <div class="gallery-main" id="gallery-main" onclick="openLB()">
           <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--g400);font-size:3rem">foto</div>
         </div>
-        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.35rem">Clique para ampliar - Passe o mouse para zoom</div>
+        <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:.35rem">Toque para ampliar</div>
         <div class="gallery-thumbs" id="gallery-thumbs"></div>
       </div>
       <div>
@@ -765,6 +767,10 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
 
 <a id="wa-btn" href="https://wa.me/5594981552665" target="_blank" aria-label="Falar no WhatsApp"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg></a>
 <div id="toast"></div>
+<div class="buybar" id="buybar">
+  <div><div style="font-weight:800;font-size:1.05rem" id="bb-price"></div><div class="price-pix" id="bb-pix"></div></div>
+  <button class="btn btn-primary" style="padding:.85rem 1.4rem" id="bb-btn" onclick="buyBar()">Escolher tamanho</button>
+</div>
 
 <script>
 var SUPA_URL = 'https://rgxdjyxfqclmzmtcprfc.supabase.co';
@@ -853,6 +859,7 @@ function mel(m, st) {
 }
 
 function nav(view, param) {
+  document.body.classList.toggle('on-prod', view === 'product');
   var gv = document.querySelector('#gallery-main video'); if (gv) { gv.muted = true; var sb = document.querySelector('#gallery-main .snd-btn'); if (sb) sb.innerHTML = IC_MUDO; }
   var all = document.querySelectorAll('.view');
   for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
@@ -905,7 +912,9 @@ function renderHome() {
     PRODS = (r && r.length > 0) ? r : DEF;
     var best = PRODS.filter(function(p) { return (p.tags || []).indexOf('mais-vendido') > -1; }).slice(0, 4);
     var news = PRODS.filter(function(p) { return (p.tags || []).indexOf('novo') > -1; }).slice(0, 4);
-    document.getElementById('home-bestsellers').innerHTML = (best.length ? best : PRODS.slice(0, 4)).map(cardHTML).join('');
+    var shown = best.length ? best : PRODS.slice(0, 4);
+    news = news.filter(function(p) { return shown.indexOf(p) < 0; });
+    document.getElementById('home-bestsellers').innerHTML = shown.map(cardHTML).join('');
     var hn = document.getElementById('home-news'); hn.innerHTML = news.length ? news.map(cardHTML).join('') : '';
     // Banner: mostra o produto mais novo que tenha foto
     var top = PRODS.filter(function(p) { return (p.media || []).length; })[0];
@@ -955,6 +964,7 @@ function renderProdData(p) {
   document.getElementById('prod-bc').innerHTML = '<a href="#" onclick="nav(\'home\');return false">Inicio</a> / <a href="#" onclick="nav(\'cat\',\'' + p.category + '\');return false">' + (CATS[p.category] || p.category) + '</a> / <span>' + p.name + '</span>';
   document.getElementById('prod-name').textContent = p.name;
   document.getElementById('prod-price').textContent = brl(p.price);
+  document.getElementById('bb-price').textContent = brl(p.price); document.getElementById('bb-pix').textContent = brl(p.price * (1 - PIX_DESC)) + ' no Pix'; document.getElementById('bb-btn').textContent = 'Escolher tamanho';
   document.getElementById('prod-pix').textContent = 'ou ' + brl(p.price * (1 - PIX_DESC)) + ' no Pix (10% off)';
   var op = document.getElementById('prod-oldprice');
   if (p.old_price || p.oldPrice) { op.textContent = brl(p.old_price || p.oldPrice); op.style.display = 'inline'; } else op.style.display = 'none';
@@ -1075,10 +1085,20 @@ function selColor(c, btn) {
 
 function selSize(s, btn) {
   prodSize = s;
+  var bb = document.getElementById('bb-btn'); if (bb) bb.textContent = 'Adicionar · ' + s;
   var all = document.querySelectorAll('.size-btn');
   for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
   btn.classList.add('active');
   document.getElementById('prod-size-error').textContent = '';
+}
+// Barra fixa de compra no celular
+function buyBar() {
+  if (!prodSize) {
+    document.getElementById('prod-sizes').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('prod-size-error').textContent = 'Escolha um tamanho!';
+    return;
+  }
+  addToCart();
 }
 function changeQty(d) { prodQty = Math.max(1, prodQty + d); document.getElementById('prod-qty').textContent = prodQty; }
 
