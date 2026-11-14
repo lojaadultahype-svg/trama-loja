@@ -31,6 +31,13 @@ input,select,textarea{font-family:inherit}
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
 @media(min-width:768px){.grid4{grid-template-columns:repeat(4,1fr)}}
 .view{display:none}.view.active{display:block}
+.logo-mark{position:relative;box-shadow:0 0 0 1px rgba(201,164,92,.45);animation:logoIn .7s ease-out both}
+.logo-mark img{transition:transform .4s ease}
+.logo-mark::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,236,190,.65) 50%,transparent 65%);transform:translateX(-130%);animation:logoShine 5s ease-in-out 1s infinite;pointer-events:none}
+.logo-img:hover .logo-mark img{transform:scale(1.08)}
+@keyframes logoShine{0%,70%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
+@keyframes logoIn{from{opacity:0;transform:scale(.7) rotate(-8deg)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.logo-mark,.logo-mark::after{animation:none}}
 .buybar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:35;background:var(--bg);border-top:1px solid var(--border);padding:.65rem 1rem calc(.65rem + env(safe-area-inset-bottom));align-items:center;justify-content:space-between;gap:.75rem;box-shadow:0 -6px 24px rgba(0,0,0,.25)}
 @media(max-width:767px){body.on-prod .buybar{display:flex}body.on-prod #wa-btn{bottom:5.25rem}body.on-prod footer{padding-bottom:5rem}}
 .play-ic{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:3rem;height:3rem;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;pointer-events:none;backdrop-filter:blur(4px)}
