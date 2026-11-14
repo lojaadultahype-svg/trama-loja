@@ -31,6 +31,7 @@ input,select,textarea{font-family:inherit}
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
 @media(min-width:768px){.grid4{grid-template-columns:repeat(4,1fr)}}
 .view{display:none}.view.active{display:block}
+.snd-btn{position:absolute;right:.75rem;bottom:.75rem;z-index:3;display:flex;align-items:center;gap:.4rem;padding:.55rem .85rem;border-radius:999px;border:none;background:rgba(0,0,0,.65);color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;backdrop-filter:blur(6px)}
 .size-btn.esgotado{opacity:.35;text-decoration:line-through;cursor:not-allowed}
 .badge-esgotado{background:var(--g600);color:var(--bone)}
 .skel{background:linear-gradient(90deg,var(--g800),var(--g700),var(--g800));background-size:200% 100%;animation:skel 1.2s ease-in-out infinite;width:100%;height:100%}
@@ -274,7 +275,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
 <div id="lightbox" onclick="closeLB()">
   <button id="lightbox-close" onclick="closeLB()">x</button>
   <img id="lb-img" src="" alt="" style="display:none"/>
-  <video id="lb-vid" src="" muted autoplay loop playsinline style="display:none"></video>
+  <video id="lb-vid" src="" muted autoplay loop playsinline controls style="display:none" onclick="event.stopPropagation()"></video>
 </div>
 
 <!-- HOME -->
@@ -849,6 +850,7 @@ function mel(m, st) {
 }
 
 function nav(view, param) {
+  var gv = document.querySelector('#gallery-main video'); if (gv) { gv.muted = true; var sb = document.querySelector('#gallery-main .snd-btn'); if (sb) sb.innerHTML = IC_MUDO; }
   var all = document.querySelectorAll('.view');
   for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
   var el = document.getElementById('view-' + view);
@@ -1583,6 +1585,16 @@ function shareProd() {
   if (navigator.share) { navigator.share({ title: curProd.name, text: txt, url: url }).catch(function() {}); return; }
   window.open('https://wa.me/?text=' + encodeURIComponent(txt + '\n' + url), '_blank');
 }
+// Botao de som nos videos do produto (o video comeca mudo; o cliente liga o som se quiser)
+var IC_MUDO = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M23 9l-6 6M17 9l6 6"/></svg>Ativar som';
+var IC_SOM = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>Som ligado';
+new MutationObserver(function() {
+  var m = document.getElementById('gallery-main'), vd = m.querySelector('video');
+  if (!vd || m.querySelector('.snd-btn')) return;
+  var b = document.createElement('button'); b.type = 'button'; b.className = 'snd-btn'; b.innerHTML = IC_MUDO;
+  b.onclick = function(e) { e.stopPropagation(); vd.muted = !vd.muted; if (!vd.muted) vd.play(); b.innerHTML = vd.muted ? IC_MUDO : IC_SOM; };
+  m.appendChild(b);
+}).observe(document.getElementById('gallery-main'), { childList: true });
 updateCartUI();
 renderHome();
 (function() { var m = location.hash.match(/^#p=(.+)$/); if (m) nav('product', decodeURIComponent(m[1])); })();
