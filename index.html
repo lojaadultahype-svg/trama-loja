@@ -598,6 +598,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
     <div class="admin-nav">
       <button class="admin-tab active" onclick="showTab('produtos',this)">Produtos</button>
       <button class="admin-tab" onclick="showTab('pedidos',this)">Pedidos</button>
+      <button class="admin-tab" onclick="showTab('compras',this)">Compras</button>
       <button class="admin-tab" onclick="showTab('config',this)">Config</button>
     </div>
 
@@ -730,6 +731,32 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
     <div class="admin-section" id="admin-pedidos">
       <h2 class="font-display" style="font-size:1.5rem;margin-bottom:1.5rem">Pedidos</h2>
       <div id="admin-orders-list"></div>
+    </div>
+
+    <!-- COMPRAS (fornecedores, simulador e historico) -->
+    <div class="admin-section" id="admin-compras">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:.5rem;flex-wrap:wrap">
+        <h2 class="font-display" style="font-size:1.5rem">Fornecedores</h2>
+        <button class="btn btn-primary btn-sm" onclick="supForm()">+ Novo fornecedor</button>
+      </div>
+      <div class="card" id="sup-form" style="display:none;margin-bottom:1rem">
+        <div class="form-row col2" style="margin-bottom:.6rem"><div><label>Nome</label><input class="field" id="sf-name" placeholder="Ex.: Atacado do Brás"/></div><div><label>WhatsApp</label><input class="field" id="sf-wa" placeholder="(11) 99999-9999"/></div></div>
+        <div class="form-row col2" style="margin-bottom:.6rem"><div><label>Cidade</label><input class="field" id="sf-city" placeholder="São Paulo - SP"/></div><div><label>Frete até aqui (R$)</label><input class="field" type="number" id="sf-freight" placeholder="90"/></div></div>
+        <div class="form-row col2" style="margin-bottom:.6rem"><div><label>Pedido mínimo</label><input class="field" id="sf-min" placeholder="6 peças"/></div><div><label>Prazo de entrega</label><input class="field" id="sf-lead" placeholder="10 dias"/></div></div>
+        <div style="margin-bottom:.75rem"><label>Observações</label><input class="field" id="sf-notes" placeholder="Troca defeito, mistura tamanhos..."/></div>
+        <div style="display:flex;gap:.5rem"><button class="btn btn-primary btn-sm" onclick="supSave()">Salvar</button><button class="btn btn-ghost btn-sm" onclick="document.getElementById('sup-form').style.display='none'">Cancelar</button></div>
+      </div>
+      <div id="sup-list"><div class="loading"><div class="spinner"></div></div></div>
+      <h2 class="font-display" style="font-size:1.5rem;margin:2.5rem 0 1rem">Simulador de pedido</h2>
+      <div class="card">
+        <label>Fornecedor</label><select class="field" id="sim-sup" onchange="simLoad()"></select>
+        <div id="sim-items" style="margin-top:1rem"></div>
+        <div style="max-width:12rem;margin-top:.5rem"><label>Frete (R$)</label><input class="field" type="number" id="sim-freight" oninput="simCalc()"/></div>
+        <div id="sim-result" style="margin-top:1rem"></div>
+      </div>
+      <h2 class="font-display" style="font-size:1.5rem;margin:2.5rem 0 1rem">Histórico de compras</h2>
+      <div id="pur-summary" style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem"></div>
+      <div id="pur-list"></div>
     </div>
 
     <!-- CONFIG -->
@@ -1425,7 +1452,7 @@ function showAdmin() {
   var all = document.querySelectorAll('.view');
   for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
   document.getElementById('view-admin').classList.add('active');
-  loadAdminProds(); loadAdminOrders(); loadConfig();
+  loadAdminProds(); loadAdminOrders(); loadConfig(); loadCompras();
 }
 function showTab(tab, btn) {
   var tabs = document.querySelectorAll('.admin-tab');
@@ -1602,6 +1629,110 @@ function saveConfig() {
   if (email) localStorage.setItem('trama.email', email);
   toast('Configuracoes salvas!');
 }
+
+// ===== Painel de compras: fornecedores, simulador e historico (somente admin) =====
+var SUPS = [], SPRICES = [], supEdit = null, simLast = null;
+function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function tierPrice(tiers, q) { var ts = (tiers || []).slice().sort(function(a, b) { return a.q - b.q; }); if (!ts.length) return 0; var p = ts[0].p; ts.forEach(function(t) { if (q >= t.q) p = t.p; }); return p; }
+function parseTiers(txt) { return txt.split(/[,;\n]/).map(function(x) { var m = x.match(/(\d+)\s*[:=x-]\s*([\d.,]+)/); return m ? { q: +m[1], p: parseFloat(m[2].replace(',', '.')) } : null; }).filter(Boolean).sort(function(a, b) { return a.q - b.q; }); }
+function tiersTxt(ts) { return (ts || []).map(function(t) { return t.q + ' pç: ' + brl(t.p); }).join(' · '); }
+function loadCompras() {
+  Promise.all([dbGet('suppliers', 'order=created_at.asc'), dbGet('supplier_prices', 'order=created_at.asc')]).then(function(r) {
+    SUPS = r[0] || []; SPRICES = r[1] || [];
+    renderSups();
+    var sel = document.getElementById('sim-sup');
+    sel.innerHTML = SUPS.length ? SUPS.map(function(x) { return '<option value="' + x.id + '">' + esc(x.name) + '</option>'; }).join('') : '<option value="">Cadastre um fornecedor</option>';
+    simLoad(); loadPurchases();
+  });
+}
+function renderSups() {
+  var el = document.getElementById('sup-list');
+  if (!SUPS.length) { el.innerHTML = '<p style="color:var(--muted)">Nenhum fornecedor ainda.</p>'; return; }
+  el.innerHTML = SUPS.map(function(x) {
+    var pr = SPRICES.filter(function(p) { return p.supplier_id === x.id; });
+    var wa = (x.whatsapp || '').replace(/\D/g, '');
+    var info = [x.city, 'Frete ' + brl(x.freight || 0), x.min_order ? 'Mínimo: ' + x.min_order : '', x.lead_time ? 'Prazo: ' + x.lead_time : ''].filter(Boolean).map(esc).join(' · ');
+    return '<div class="order-card"><div style="display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;align-items:flex-start">' +
+      '<div><div style="font-weight:800">' + esc(x.name) + '</div><div style="font-size:.78rem;color:var(--muted)">' + info + '</div>' + (x.notes ? '<div style="font-size:.78rem;margin-top:.25rem">' + esc(x.notes) + '</div>' : '') + '</div>' +
+      '<div style="display:flex;gap:.35rem;flex-wrap:wrap">' + (wa ? '<a class="btn btn-sm btn-secondary" href="https://wa.me/' + (wa.length <= 11 ? '55' + wa : wa) + '" target="_blank">WhatsApp</a>' : '') +
+      '<button class="btn btn-sm btn-secondary" onclick="supForm(\'' + x.id + '\')">Editar</button><button class="btn btn-sm btn-ghost" onclick="supDel(\'' + x.id + '\')">Excluir</button></div></div>' +
+      '<div style="margin-top:.75rem;border-top:1px solid var(--border);padding-top:.6rem">' +
+      (pr.length ? pr.map(function(p) { return '<div style="display:flex;justify-content:space-between;gap:.5rem;font-size:.82rem;padding:.3rem 0"><div><b>' + esc(p.product) + '</b><div style="color:var(--muted);font-size:.75rem">' + tiersTxt(p.tiers) + '</div></div><button class="btn btn-sm btn-ghost" onclick="priceDel(\'' + p.id + '\')">x</button></div>'; }).join('') : '<div style="font-size:.8rem;color:var(--muted)">Sem preços cadastrados.</div>') +
+      '<div style="display:grid;grid-template-columns:1fr 1.4fr auto;gap:.4rem;margin-top:.5rem"><input class="field" style="padding:.45rem .6rem;font-size:.8rem" placeholder="Produto" id="np-p-' + x.id + '"/><input class="field" style="padding:.45rem .6rem;font-size:.8rem" placeholder="6:90, 10:85, 20:82" id="np-t-' + x.id + '"/><button class="btn btn-sm btn-primary" onclick="priceAdd(\'' + x.id + '\')">+ Preço</button></div>' +
+      '</div></div>';
+  }).join('');
+}
+function supForm(id) {
+  supEdit = id || null; var x = SUPS.filter(function(z) { return z.id === id; })[0] || {};
+  [['name', 'name'], ['wa', 'whatsapp'], ['city', 'city'], ['freight', 'freight'], ['min', 'min_order'], ['lead', 'lead_time'], ['notes', 'notes']].forEach(function(f) { document.getElementById('sf-' + f[0]).value = x[f[1]] == null ? '' : x[f[1]]; });
+  var f = document.getElementById('sup-form'); f.style.display = 'block'; f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function supSave() {
+  var d = { name: document.getElementById('sf-name').value.trim(), whatsapp: document.getElementById('sf-wa').value.trim(), city: document.getElementById('sf-city').value.trim(), freight: parseFloat(document.getElementById('sf-freight').value) || 0, min_order: document.getElementById('sf-min').value.trim(), lead_time: document.getElementById('sf-lead').value.trim(), notes: document.getElementById('sf-notes').value.trim() };
+  if (!d.name) { toast('Informe o nome do fornecedor'); return; }
+  (supEdit ? dbUpd('suppliers', supEdit, d) : dbIns('suppliers', d)).then(function(r) { if (!r) { toast('Erro ao salvar. Faça login de novo.'); return; } document.getElementById('sup-form').style.display = 'none'; toast('Fornecedor salvo!'); loadCompras(); });
+}
+function supDel(id) { if (!confirm('Excluir este fornecedor e os preços dele?')) return; dbDel('suppliers', id).then(function() { toast('Fornecedor excluído'); loadCompras(); }); }
+function priceAdd(sid) {
+  var p = document.getElementById('np-p-' + sid).value.trim(), ts = parseTiers(document.getElementById('np-t-' + sid).value);
+  if (!p || !ts.length) { toast('Informe o produto e os preços (ex.: 6:90, 10:85)'); return; }
+  dbIns('supplier_prices', { supplier_id: sid, product: p, tiers: ts }).then(function(r) { if (!r) { toast('Erro ao salvar. Faça login de novo.'); return; } toast('Preço salvo!'); loadCompras(); });
+}
+function priceDel(id) { if (!confirm('Excluir este preço?')) return; dbDel('supplier_prices', id).then(function() { loadCompras(); }); }
+function simLoad() {
+  var sid = document.getElementById('sim-sup').value, x = SUPS.filter(function(z) { return z.id === sid; })[0];
+  var pr = SPRICES.filter(function(p) { return p.supplier_id === sid; });
+  document.getElementById('sim-freight').value = x ? (x.freight || 0) : 0;
+  document.getElementById('sim-items').innerHTML = pr.length ? pr.map(function(p, i) {
+    var c = tierPrice(p.tiers, 10), sug = Math.max(9.9, Math.round(c * 1.8 / 10) * 10 - 0.1);
+    return '<div style="display:grid;grid-template-columns:1.6fr .7fr 1fr;gap:.5rem;align-items:end;margin-bottom:.6rem"><div style="font-size:.85rem;font-weight:700">' + esc(p.product) + '<div style="font-size:.72rem;color:var(--muted);font-weight:400">' + tiersTxt(p.tiers) + '</div></div>' +
+      '<div><label style="font-size:.7rem">Qtd</label><input class="field" type="number" min="0" value="0" data-sim="q" data-i="' + i + '" oninput="simCalc()" style="padding:.45rem .6rem"/></div>' +
+      '<div><label style="font-size:.7rem">Vender por (R$)</label><input class="field" type="number" step="0.01" value="' + sug.toFixed(2) + '" data-sim="v" data-i="' + i + '" oninput="simCalc()" style="padding:.45rem .6rem"/></div></div>';
+  }).join('') : '<p style="font-size:.85rem;color:var(--muted)">Cadastre os preços desse fornecedor acima.</p>';
+  simCalc();
+}
+function simCalc() {
+  var sid = document.getElementById('sim-sup').value, pr = SPRICES.filter(function(p) { return p.supplier_id === sid; });
+  var fr = parseFloat(document.getElementById('sim-freight').value) || 0, items = [], pecas = 0, sub = 0;
+  pr.forEach(function(p, i) {
+    var q = parseInt((document.querySelector('[data-sim="q"][data-i="' + i + '"]') || {}).value) || 0;
+    var v = parseFloat((document.querySelector('[data-sim="v"][data-i="' + i + '"]') || {}).value) || 0;
+    if (q > 0) { var u = tierPrice(p.tiers, q), minQ = ((p.tiers || [])[0] || {}).q || 0; items.push({ product: p.product, qty: q, unit: u, sell: v, abaixo: q < minQ }); pecas += q; sub += u * q; }
+  });
+  var out = document.getElementById('sim-result');
+  if (!items.length) { out.innerHTML = '<p style="font-size:.85rem;color:var(--muted)">Coloque as quantidades para simular.</p>'; simLast = null; return; }
+  var fp = fr / pecas, total = sub + fr, recC = 0, recP = 0;
+  var rows = items.map(function(it) {
+    var custo = it.unit + fp, pix = it.sell * (1 - PIX_DESC); recC += it.sell * it.qty; recP += pix * it.qty;
+    return '<tr><td style="text-align:left">' + esc(it.product) + (it.abaixo ? ' <span style="color:var(--coral)">(abaixo do mínimo)</span>' : '') + '</td><td>' + it.qty + '</td><td>' + brl(it.unit) + '</td><td><b>' + brl(custo) + '</b></td><td>' + brl(it.sell - custo) + '</td><td><b>' + brl(pix - custo) + '</b></td></tr>';
+  }).join('');
+  var recupera = Math.min(pecas, Math.ceil(total / (recP / pecas)));
+  var box = function(t, v, c) { return '<div class="card" style="padding:.75rem"><div style="font-size:.72rem;color:var(--muted)">' + t + '</div><div style="font-weight:800;font-size:1.1rem' + (c ? ';color:var(--coral)' : '') + '">' + v + '</div></div>'; };
+  out.innerHTML = '<div style="overflow-x:auto"><table class="medidas-table"><thead><tr><th>Produto</th><th>Qtd</th><th>Preço un.</th><th>Custo real</th><th>Lucro cheio</th><th>Lucro Pix</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="medidas-grid" style="margin-top:.85rem">' + box('Investimento (com frete)', brl(total)) + box('Lucro vendendo tudo no Pix', brl(recP - total), 1) + box('Lucro no preço cheio', brl(recC - total)) + box('Recupera o investimento', 'com ' + recupera + ' de ' + pecas + ' peças') + '</div>' +
+    '<button class="btn btn-primary btn-sm" style="margin-top:.85rem" onclick="simSave()">Salvar como pedido</button>';
+  simLast = { items: items, freight: fr, total: total };
+}
+function simSave() {
+  if (!simLast) return; var sid = document.getElementById('sim-sup').value, x = SUPS.filter(function(z) { return z.id === sid; })[0] || {};
+  dbIns('purchases', { supplier_id: sid || null, supplier_name: x.name || '', items: simLast.items, freight: simLast.freight, total: simLast.total, status: 'cotado' }).then(function(r) { if (!r) { toast('Erro ao salvar. Faça login de novo.'); return; } toast('Pedido salvo no histórico!'); loadPurchases(); });
+}
+var PUR_ST = { cotado: 'Cotado', pedido: 'Pedido feito', pago: 'Pago', recebido: 'Recebido' };
+function loadPurchases() {
+  dbGet('purchases', 'order=created_at.desc').then(function(r) {
+    r = r || [];
+    var inv = r.filter(function(p) { return p.status === 'pago' || p.status === 'recebido'; }).reduce(function(a, p) { return a + Number(p.total || 0); }, 0);
+    document.getElementById('pur-summary').textContent = r.length ? 'Total já investido (pago ou recebido): ' + brl(inv) : '';
+    document.getElementById('pur-list').innerHTML = r.length ? r.map(function(p) {
+      var pcs = (p.items || []).reduce(function(a, i) { return a + i.qty; }, 0);
+      return '<div class="order-card"><div style="display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap"><div><div style="font-weight:800">' + esc(p.supplier_name || 'Fornecedor') + ' · ' + brl(p.total) + '</div><div style="font-size:.75rem;color:var(--muted)">' + new Date(p.created_at).toLocaleDateString('pt-BR') + ' · ' + pcs + ' peças · frete ' + brl(p.freight) + '</div>' +
+        '<div style="font-size:.78rem;margin-top:.3rem">' + (p.items || []).map(function(i) { return i.qty + 'x ' + esc(i.product); }).join(', ') + '</div></div>' +
+        '<div style="display:flex;gap:.35rem;align-items:center"><select class="field" style="padding:.4rem .5rem;font-size:.78rem;width:auto" onchange="purStatus(\'' + p.id + '\',this.value)">' + Object.keys(PUR_ST).map(function(k) { return '<option value="' + k + '"' + (p.status === k ? ' selected' : '') + '>' + PUR_ST[k] + '</option>'; }).join('') + '</select><button class="btn btn-sm btn-ghost" onclick="purDel(\'' + p.id + '\')">x</button></div></div></div>';
+    }).join('') : '<p style="color:var(--muted);font-size:.85rem">Nenhuma compra salva. Use o simulador e clique em "Salvar como pedido".</p>';
+  });
+}
+function purStatus(id, st) { dbUpd('purchases', id, { status: st }).then(function() { toast('Status atualizado'); loadPurchases(); }); }
+function purDel(id) { if (!confirm('Excluir este pedido do histórico?')) return; dbDel('purchases', id).then(function() { loadPurchases(); }); }
 
 function openMobileMenu() { document.getElementById('mobile-menu').classList.add('open'); document.getElementById('menu-overlay').classList.add('open'); }
 function closeMobileMenu() { document.getElementById('mobile-menu').classList.remove('open'); document.getElementById('menu-overlay').classList.remove('open'); }
