@@ -228,6 +228,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
       <a class="logo logo-img" href="#" onclick="nav('home');return false"><span class="logo-mark"><img src="WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg" alt=""/></span>TRAMA</a>
       <nav class="nav-desktop">
         <a data-cat="camisetas" class="nav-link" href="#" onclick="nav('cat','camisetas');return false">Camisetas</a>
+        <a data-cat="bermudas" class="nav-link" href="#" onclick="nav('cat','bermudas');return false">Shorts</a>
         <a data-cat="moletons" class="nav-link" href="#" onclick="nav('cat','moletons');return false">Moletons</a>
         <a data-cat="calcas" class="nav-link" href="#" onclick="nav('cat','calcas');return false">Calcas</a>
         <a data-cat="jaquetas" class="nav-link" href="#" onclick="nav('cat','jaquetas');return false">Jaquetas</a>
@@ -258,6 +259,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
     <button class="icon-btn" onclick="closeMobileMenu()"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20"/></svg></button>
   </div>
   <a data-cat="camisetas" class="mobile-nav-link" href="#" onclick="nav('cat','camisetas');closeMobileMenu();return false">Camisetas</a>
+  <a data-cat="bermudas" class="mobile-nav-link" href="#" onclick="nav('cat','bermudas');closeMobileMenu();return false">Shorts e bermudas</a>
   <a data-cat="moletons" class="mobile-nav-link" href="#" onclick="nav('cat','moletons');closeMobileMenu();return false">Moletons</a>
   <a data-cat="calcas" class="mobile-nav-link" href="#" onclick="nav('cat','calcas');closeMobileMenu();return false">Calcas</a>
   <a data-cat="jaquetas" class="mobile-nav-link" href="#" onclick="nav('cat','jaquetas');closeMobileMenu();return false">Jaquetas</a>
@@ -601,6 +603,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
           <div><label>Categoria</label>
             <select class="field" id="pf-cat">
               <option value="camisetas">Camisetas</option>
+                <option value="bermudas">Shorts e bermudas</option>
               <option value="moletons">Moletons</option>
               <option value="calcas">Calcas</option>
               <option value="jaquetas">Jaquetas</option>
@@ -641,6 +644,16 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
               <button type="button" class="tag" data-color="verde" onclick="this.classList.toggle('active')">Verde</button>
               <button type="button" class="tag" data-color="bege" onclick="this.classList.toggle('active')">Bege</button>
               <button type="button" class="tag" data-color="azul" onclick="this.classList.toggle('active')">Azul</button>
+              <button type="button" class="tag" data-color="cinza" onclick="this.classList.toggle('active')">Cinza</button>
+              <button type="button" class="tag" data-color="grafite" onclick="this.classList.toggle('active')">Grafite</button>
+              <button type="button" class="tag" data-color="rosa" onclick="this.classList.toggle('active')">Rosa</button>
+              <button type="button" class="tag" data-color="oliva" onclick="this.classList.toggle('active')">Verde-oliva</button>
+              <button type="button" class="tag" data-color="verde-escuro" onclick="this.classList.toggle('active')">Verde-escuro</button>
+              <button type="button" class="tag" data-color="marrom" onclick="this.classList.toggle('active')">Marrom</button>
+              <button type="button" class="tag" data-color="salmao" onclick="this.classList.toggle('active')">Salmão</button>
+              <button type="button" class="tag" data-color="off-white" onclick="this.classList.toggle('active')">Off-white</button>
+              <button type="button" class="tag" data-color="vinho" onclick="this.classList.toggle('active')">Vinho</button>
+              <button type="button" class="tag" data-color="caqui" onclick="this.classList.toggle('active')">Caqui</button>
             </div>
           </div>
           <div>
@@ -726,6 +739,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
       <div class="footer-col">
         <h4>Categorias</h4>
         <a data-cat="camisetas" href="#" onclick="nav('cat','camisetas');return false">Camisetas</a>
+        <a data-cat="bermudas" href="#" onclick="nav('cat','bermudas');return false">Shorts e bermudas</a>
         <a data-cat="moletons" href="#" onclick="nav('cat','moletons');return false">Moletons</a>
         <a data-cat="calcas" href="#" onclick="nav('cat','calcas');return false">Calcas</a>
         <a data-cat="jaquetas" href="#" onclick="nav('cat','jaquetas');return false">Jaquetas</a>
@@ -900,7 +914,7 @@ function renderHome() {
   });
 }
 
-var CATS = { camisetas: 'Camisetas', moletons: 'Moletons', calcas: 'Calcas', jaquetas: 'Jaquetas', acessorios: 'Acessorios' };
+var CATS = { camisetas: 'Camisetas', bermudas: 'Shorts e bermudas', moletons: 'Moletons', calcas: 'Calcas', jaquetas: 'Jaquetas', acessorios: 'Acessorios' };
 
 function renderCat(slug) {
   document.getElementById('cat-title').textContent = CATS[slug] || slug;
@@ -958,7 +972,7 @@ function renderProdData(p) {
     return '<div class="thumb' + (i === 0 ? ' active' : '') + '" onclick="selThumb(this,\'' + s + '\',' + (v ? 1 : 0) + ')">' + (v ? '<video src="' + s + '" muted style="width:100%;height:100%;object-fit:cover"></video>' : '<img src="' + s + '" style="width:100%;height:100%;object-fit:cover"/>') + '</div>';
   }).join('') : '';
 
-  var CMAP = { preto: '#16181D', branco: '#F6F4EF', coral: '#FF5470', verde: '#4B5D3A', bege: '#D8CBB5', azul: '#3A4A6B' };
+  var CMAP = { preto: '#16181D', branco: '#F6F4EF', coral: '#FF5470', verde: '#4B5D3A', bege: '#D8CBB5', azul: '#3A4A6B', cinza: '#55585E', grafite: '#3B3D42', rosa: '#E8C6C3', oliva: '#6E6B45', marrom: '#5A3A2A', salmao: '#E38B76', 'verde-escuro': '#25362A', 'off-white': '#ECE8DF', vinho: '#5E1F2A', caqui: '#B8A27A' };
   document.getElementById('prod-color-label').textContent = prodColor || '';
   document.getElementById('prod-colors').innerHTML = (p.colors || []).map(function(c) {
     return '<button class="swatch' + (c === prodColor ? ' active' : '') + '" style="background:' + (CMAP[c] || '#ccc') + '" title="' + c + '" onclick="selColor(\'' + c + '\',this)"></button>';
