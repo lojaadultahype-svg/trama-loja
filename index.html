@@ -31,6 +31,10 @@ input,select,textarea{font-family:inherit}
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
 @media(min-width:768px){.grid4{grid-template-columns:repeat(4,1fr)}}
 .view{display:none}.view.active{display:block}
+.brand-big{position:relative;overflow:hidden;border-radius:16px;background:#222229;box-shadow:0 0 0 1px rgba(201,164,92,.45);margin:0 auto 1.25rem}
+.brand-big img{width:100%;display:block}
+.brand-big::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,236,190,.5) 50%,transparent 65%);transform:translateX(-130%);animation:logoShine 5s ease-in-out .6s infinite;pointer-events:none}
+@media(prefers-reduced-motion:reduce){.brand-big::after{animation:none}}
 .logo-mark{position:relative;box-shadow:0 0 0 1px rgba(201,164,92,.45);animation:logoIn .7s ease-out both}
 .logo-mark img{transition:transform .4s ease}
 .logo-mark::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,236,190,.65) 50%,transparent 65%);transform:translateX(-130%);animation:logoShine 5s ease-in-out 1s infinite;pointer-events:none}
@@ -437,7 +441,8 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
   <div class="wrap" style="padding-top:1.5rem;padding-bottom:4rem">
     <h1 class="font-display display-md" style="margin-bottom:1.5rem">Sua sacola</h1>
     <div id="cart-empty" style="text-align:center;padding:3rem 0;display:none">
-      <p style="color:var(--muted);margin-bottom:1rem">Sacola vazia.</p>
+      <div class="brand-big" style="width:6rem;opacity:.85"><img src="WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg" alt=""/></div>
+      <p style="color:var(--muted);margin-bottom:1rem">Sua sacola está vazia.</p>
       <button class="btn btn-primary" onclick="goShop()">Ver produtos</button>
     </div>
     <div id="cart-content">
@@ -513,9 +518,9 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
     </div>
     <div id="co-done" style="display:none">
       <div class="success-screen">
-        <div class="success-icon">ok</div>
+        <div class="brand-big" style="width:9rem"><img src="WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg" alt="TRAMA Luxury"/></div>
         <h1 class="font-display" style="font-size:2rem;margin-bottom:.5rem">Pedido enviado!</h1>
-        <p style="color:var(--muted);margin-bottom:2rem;line-height:1.6">O WhatsApp abriu com sua sacola pronta!</p>
+        <p style="color:var(--muted);margin-bottom:2rem;line-height:1.6">Obrigado por comprar na TRAMA. O WhatsApp abriu com sua sacola pronta, e a gente te responde rapidinho.</p>
         <button class="btn btn-primary" onclick="nav('home')">Voltar para inicio</button>
       </div>
     </div>
@@ -743,8 +748,8 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-col">
-        <span class="logo" style="font-size:1.5rem;display:block;margin-bottom:.65rem">TRAMA</span>
-        <p>Moda com identidade, atendimento pessoal.</p>
+        <div class="brand-big" style="width:7.5rem;margin:0 0 1rem"><img src="WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg" alt="TRAMA Luxury"/></div>
+        <p>Moda masculina com identidade e atendimento pessoal.</p>
         <p>São Félix do Xingu - PA</p>
       </div>
       <div class="footer-col">
