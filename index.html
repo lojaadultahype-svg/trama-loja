@@ -31,6 +31,10 @@ input,select,textarea{font-family:inherit}
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
 @media(min-width:768px){.grid4{grid-template-columns:repeat(4,1fr)}}
 .view{display:none}.view.active{display:block}
+.size-btn.esgotado{opacity:.35;text-decoration:line-through;cursor:not-allowed}
+.badge-esgotado{background:var(--g600);color:var(--bone)}
+.skel{background:linear-gradient(90deg,var(--g800),var(--g700),var(--g800));background-size:200% 100%;animation:skel 1.2s ease-in-out infinite;width:100%;height:100%}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .perks{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:1.5rem}
 @media(min-width:768px){.perks{grid-template-columns:repeat(4,1fr)}}
 .perk{display:flex;align-items:center;gap:.6rem;padding:.7rem .8rem;border:1px solid var(--border);border-radius:var(--rad-sm);background:var(--card);font-size:.78rem;font-weight:700;line-height:1.25}
@@ -278,14 +282,14 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
       <div class="hero-grid">
         <div>
           <span class="eyebrow">Moda masculina • São Félix do Xingu</span>
-          <h1 class="font-display display-xl" style="margin-top:.5rem;color:var(--bone)">Veja, escolha,<br><span style="color:var(--lime)">confirme no WhatsApp.</span></h1>
+          <h1 class="font-display display-xl" style="margin-top:.5rem;color:var(--bone)">Estilo que<br><span style="color:var(--lime)">fala por você.</span></h1>
           <p style="margin-top:1rem;color:#A8A7A1;line-height:1.6;max-width:26rem">Moda em São Félix do Xingu. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire com a gente. Respondemos rápido!</p>
           <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem">
             <button class="btn btn-primary" onclick="goShop()">Ver produtos</button>
             <button class="btn" style="background:transparent;color:var(--lime);border:2px solid var(--lime)" onclick="nav('provador')">Provador Virtual</button>
           </div>
         </div>
-        <div class="hero-img-box" id="hero-media" style="background:#222229"><img src="WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg" alt="TRAMA Luxury" style="object-fit:contain"/></div>
+        <div class="hero-img-box" id="hero-media" style="background:#222229"><div class="skel"></div></div>
       </div>
     </div>
   </section>
@@ -357,7 +361,8 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
         <button class="btn btn-primary" style="width:100%;margin-bottom:.65rem;padding:1rem" onclick="addToCart()">Adicionar a sacola</button>
         <button class="btn btn-lime" style="width:100%;margin-bottom:1.5rem;padding:1rem" onclick="buyNow()">Confirmar pedido agora</button>
         <button class="btn btn-secondary" style="width:100%;margin-top:-.85rem;margin-bottom:.4rem;padding:1rem" onclick="tryAtHome()">Quero provar em casa</button>
-        <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-bottom:1.5rem">Levamos as peças até você em São Félix do Xingu. Você prova e paga só o que ficar.</p>
+        <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-bottom:.75rem">Levamos as peças até você em São Félix do Xingu. Você prova e paga só o que ficar.</p>
+        <button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:1.25rem" onclick="shareProd()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Compartilhar com um amigo</button>
         <p style="font-size:.85rem;line-height:1.7;color:var(--muted);border-top:1px solid var(--border);padding-top:1.25rem;margin-bottom:1.5rem" id="prod-desc"></p>
 
         <!-- TABELA DE MEDIDAS -->
@@ -616,6 +621,18 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
             </div>
           </div>
           <div>
+            <label>Tamanhos esgotados (aparecem riscados no site)</label>
+            <div style="display:flex;flex-wrap:wrap;gap:.5rem" id="pf-soldout">
+              <button type="button" class="tag" onclick="this.classList.toggle('active')">PP</button>
+              <button type="button" class="tag" onclick="this.classList.toggle('active')">P</button>
+              <button type="button" class="tag" onclick="this.classList.toggle('active')">M</button>
+              <button type="button" class="tag" onclick="this.classList.toggle('active')">G</button>
+              <button type="button" class="tag" onclick="this.classList.toggle('active')">GG</button>
+              <button type="button" class="tag" onclick="this.classList.toggle('active')">XG</button>
+              <button type="button" class="tag" onclick="this.classList.toggle('active')">Unico</button>
+            </div>
+          </div>
+          <div>
             <label>Cores</label>
             <div style="display:flex;flex-wrap:wrap;gap:.5rem" id="pf-colors">
               <button type="button" class="tag" data-color="preto" onclick="this.classList.toggle('active')">Preto</button>
@@ -839,7 +856,7 @@ function cardHTML(p) {
   var d = disc(p.price, p.old_price || p.oldPrice);
   var ma = p.media || [];
   var mh = ma.length > 0 ? mel(ma[0]) : '<div class="product-img-placeholder">foto</div>';
-  var bgs = (d > 0 ? '<span class="badge-tag badge-promo">-' + d + '%</span>' : '') + ((p.tags || []).indexOf('novo') > -1 ? '<span class="badge-tag badge-novo">Novo</span>' : '');
+  var bgs = (d > 0 ? '<span class="badge-tag badge-promo">-' + d + '%</span>' : '') + ((p.tags || []).indexOf('novo') > -1 ? '<span class="badge-tag badge-novo">Novo</span>' : '') + ((p.sizes || []).length && (p.sizes || []).every(function(z) { return (p.sold_out || []).indexOf(z) > -1; }) ? '<span class="badge-tag badge-esgotado">Esgotado</span>' : '');
   return '<div class="product-card">' +
     '<div class="product-image" onclick="nav(\'product\',\'' + p.id + '\')">' + mh + '<div class="badges">' + bgs + '</div></div>' +
     '<div class="product-info" onclick="nav(\'product\',\'' + p.id + '\')">' +
@@ -873,6 +890,7 @@ function renderHome() {
     var hn = document.getElementById('home-news'); hn.innerHTML = news.length ? news.map(cardHTML).join('') : '';
     // Banner: mostra o produto mais novo que tenha foto
     var top = PRODS.filter(function(p) { return (p.media || []).length; })[0];
+    if (!top || PRODS === DEF) document.getElementById('hero-media').innerHTML = '<img src="WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg" alt="TRAMA Luxury" style="object-fit:contain"/>';
     if (top && PRODS !== DEF) {
       var hm = document.getElementById('hero-media');
       hm.innerHTML = '<div class="hero-prod" onclick="nav(\'product\',\'' + top.id + '\')">' + mel(top.media[0], 'width:100%;height:100%;object-fit:cover') +
@@ -945,7 +963,9 @@ function renderProdData(p) {
   document.getElementById('prod-colors').innerHTML = (p.colors || []).map(function(c) {
     return '<button class="swatch' + (c === prodColor ? ' active' : '') + '" style="background:' + (CMAP[c] || '#ccc') + '" title="' + c + '" onclick="selColor(\'' + c + '\',this)"></button>';
   }).join('');
+  var so = p.sold_out || [];
   document.getElementById('prod-sizes').innerHTML = (p.sizes || []).map(function(s) {
+    if (so.indexOf(s) > -1) return '<button class="size-btn esgotado" type="button" title="Esgotado" onclick="toast(\'Tamanho ' + s + ' esgotado. Fale com a gente no WhatsApp!\')">' + s + '</button>';
     return '<button class="size-btn" onclick="selSize(\'' + s + '\',this)" type="button">' + s + '</button>';
   }).join('');
   document.getElementById('prod-qty').textContent = '1';
@@ -1044,6 +1064,7 @@ function selSize(s, btn) {
 function changeQty(d) { prodQty = Math.max(1, prodQty + d); document.getElementById('prod-qty').textContent = prodQty; }
 
 function addToCart() {
+  if (prodSize && curProd && (curProd.sold_out || []).indexOf(prodSize) > -1) { toast('Tamanho esgotado'); return; }
   if (!prodSize) { document.getElementById('prod-size-error').textContent = 'Escolha um tamanho!'; return; }
   var key = curProd.id + '__' + prodSize + '__' + (prodColor || '');
   var ex = null;
@@ -1385,7 +1406,7 @@ function openNewProd() {
   document.getElementById('pf-oldprice').value = ''; document.getElementById('pf-cat').value = 'camisetas';
   document.getElementById('pf-desc').value = ''; document.getElementById('pf-media-link').value = '';
   document.getElementById('pf-del-btn').style.display = 'none';
-  var ts = document.querySelectorAll('#pf-sizes .tag, #pf-colors .tag, .admin-section .tag[data-tag]');
+  var ts = document.querySelectorAll('#pf-sizes .tag, #pf-soldout .tag, #pf-colors .tag, .admin-section .tag[data-tag]');
   for (var i = 0; i < ts.length; i++) ts[i].classList.remove('active');
   var sns = ['PP','P','M','G','GG','XG'];
   for (var si = 0; si < sns.length; si++) {
@@ -1414,6 +1435,8 @@ function editProd(id) {
 
   var szTags = document.querySelectorAll('#pf-sizes .tag');
   for (var j = 0; j < szTags.length; j++) szTags[j].classList.toggle('active', (p.sizes || []).indexOf(szTags[j].textContent.trim()) > -1);
+  var soTags = document.querySelectorAll('#pf-soldout .tag');
+  for (var j2 = 0; j2 < soTags.length; j2++) soTags[j2].classList.toggle('active', (p.sold_out || []).indexOf(soTags[j2].textContent.trim()) > -1);
   var clTags = document.querySelectorAll('#pf-colors .tag');
   for (var k = 0; k < clTags.length; k++) clTags[k].classList.toggle('active', (p.colors || []).indexOf(clTags[k].dataset.color) > -1);
   var tgTags = document.querySelectorAll('.admin-section .tag[data-tag]');
@@ -1473,6 +1496,8 @@ function saveProd() {
 
   var sizes = []; var szTags = document.querySelectorAll('#pf-sizes .tag.active');
   for (var i = 0; i < szTags.length; i++) sizes.push(szTags[i].textContent.trim());
+  var soldOut = []; var soTags = document.querySelectorAll('#pf-soldout .tag.active');
+  for (var i2 = 0; i2 < soTags.length; i2++) soldOut.push(soTags[i2].textContent.trim());
   var colors = []; var clTags = document.querySelectorAll('#pf-colors .tag.active');
   for (var j = 0; j < clTags.length; j++) if (clTags[j].dataset.color) colors.push(clTags[j].dataset.color);
   var tags = []; var tgTags = document.querySelectorAll('.admin-section .tag[data-tag].active');
@@ -1487,7 +1512,7 @@ function saveProd() {
     if (bv && bv.value) { sc[sn] = { b: parseFloat(bv.value) || null, c: cv ? parseFloat(cv.value) || null : null, q: qv ? parseFloat(qv.value) || null : null, l: lv ? parseFloat(lv.value) || null : null }; }
   }
 
-  var data = { name: name, price: price, old_price: op, category: cat, description: desc, sizes: sizes, colors: colors, tags: tags, media: tmpMedia, size_chart: sc };
+  var data = { name: name, price: price, old_price: op, category: cat, description: desc, sizes: sizes, sold_out: soldOut, colors: colors, tags: tags, media: tmpMedia, size_chart: sc };
   var fn = editId ? dbUpd('products', editId, data) : dbIns('products', Object.assign({ id: uid(), created_at: new Date().toISOString() }, data));
   fn.then(function() { toast('Produto salvo!'); closeProdForm(); loadAdminProds(); });
 }
@@ -1536,8 +1561,17 @@ function toast(msg) { var t = document.getElementById('toast'); t.textContent = 
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLB(); });
 document.getElementById('wa-btn').href = 'https://wa.me/' + getWA();
 document.getElementById('footer-wa').href = 'https://wa.me/' + getWA();
+// Link direto para produto: trama-loja.vercel.app/#p=ID
+function shareProd() {
+  if (!curProd) return;
+  var url = location.origin + '/#p=' + encodeURIComponent(curProd.id);
+  var txt = 'Olha essa peça da TRAMA: ' + curProd.name + ' por ' + brl(curProd.price) + ' (' + brl(curProd.price * (1 - PIX_DESC)) + ' no Pix)';
+  if (navigator.share) { navigator.share({ title: curProd.name, text: txt, url: url }).catch(function() {}); return; }
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt + '\n' + url), '_blank');
+}
 updateCartUI();
 renderHome();
+(function() { var m = location.hash.match(/^#p=(.+)$/); if (m) nav('product', decodeURIComponent(m[1])); })();
 </script>
 </body>
 </html>
