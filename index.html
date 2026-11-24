@@ -1017,13 +1017,16 @@ function goShop() { nav('home'); setTimeout(function() { var e = document.getEle
 var heroTimer = null, heroIdx = 0;
 function heroCarousel(tops) {
   var hm = document.getElementById('hero-media'); clearInterval(heroTimer); heroIdx = 0;
-  if (!tops.length) { hm.innerHTML = '<img src="WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg" alt="TRAMA Luxury" style="object-fit:contain"/>'; return; }
-  hm.innerHTML = tops.map(function(p, i) {
-    var badge = (p.old_price ? '<span class="badge-tag badge-promo">-' + disc(p.price, p.old_price) + '%</span> ' : '') + '<span class="badge-tag badge-novo">' + (p.encomenda ? 'Encomenda' : 'Novidade') + '</span>';
-    return '<div class="hero-slide hero-prod' + (i === 0 ? ' on' : '') + '" onclick="nav(\'product\',\'' + p.id + '\')">' + mel(p.media[0], 'width:100%;height:100%;object-fit:cover') + (isvid(p.media[0]) ? PLAY_IC : '') +
+  // Uma imagem por slide: passa por TODAS as fotos de cada produto (videos so a capa), ate 14 slides
+  var slides = [];
+  tops.forEach(function(p) { (p.media || []).forEach(function(m, k) { if (slides.length < 14 && (!isvid(m) || k === 0)) slides.push({ p: p, m: m }); }); });
+  if (!slides.length) { hm.innerHTML = '<img src="WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg" alt="TRAMA Luxury" style="object-fit:contain"/>'; return; }
+  hm.innerHTML = slides.map(function(sd, i) {
+    var p = sd.p, badge = (p.old_price ? '<span class="badge-tag badge-promo">-' + disc(p.price, p.old_price) + '%</span> ' : '') + '<span class="badge-tag badge-novo">' + (p.encomenda ? 'Encomenda' : 'Novidade') + '</span>';
+    return '<div class="hero-slide hero-prod' + (i === 0 ? ' on' : '') + '" onclick="nav(\'product\',\'' + p.id + '\')">' + mel(sd.m, 'width:100%;height:100%;object-fit:cover') + (isvid(sd.m) ? PLAY_IC : '') +
       '<div class="hero-prod-info">' + badge + '<div style="font-weight:800;margin-top:.4rem">' + p.name + '</div><div style="font-size:.85rem;color:var(--lime)">' + brl(p.price) + ' · ' + brl(p.price * (1 - PIX_DESC)) + ' no Pix</div></div></div>';
-  }).join('') + (tops.length > 1 ? '<div class="hero-dots">' + tops.map(function(p, i) { return '<button class="' + (i === 0 ? 'on' : '') + '" aria-label="Produto ' + (i + 1) + '" onclick="event.stopPropagation();heroGo(' + i + ',true)"></button>'; }).join('') + '</div>' : '');
-  if (tops.length > 1) heroTimer = setInterval(function() { heroGo(heroIdx + 1); }, 4000);
+  }).join('') + (slides.length > 1 ? '<div class="hero-dots">' + slides.map(function(sd, i) { return '<button class="' + (i === 0 ? 'on' : '') + '" aria-label="Foto ' + (i + 1) + '" onclick="event.stopPropagation();heroGo(' + i + ',true)"></button>'; }).join('') + '</div>' : '');
+  if (slides.length > 1) heroTimer = setInterval(function() { heroGo(heroIdx + 1); }, 3500);
 }
 function heroGo(i, manual) {
   var sl = document.querySelectorAll('#hero-media .hero-slide'), dt = document.querySelectorAll('#hero-media .hero-dots button');
