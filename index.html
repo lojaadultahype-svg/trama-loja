@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="theme-color" content="#0E0E10"/>
+<!-- LOJA PAUSADA: remover esta linha e mudar LOJA_PAUSADA para false para reabrir -->
+<meta name="robots" content="noindex, nofollow"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>TRAMA Luxury | Moda em São Félix do Xingu</title>
 <meta name="description" content="TRAMA Luxury, loja de roupas em São Félix do Xingu - PA. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire com a gente. Pix ou pagamento na entrega."/>
@@ -31,6 +33,8 @@ input,select,textarea{font-family:inherit}
 .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
 @media(min-width:768px){.grid4{grid-template-columns:repeat(4,1fr)}}
 .view{display:none}.view.active{display:block}
+#gate{position:fixed;inset:0;z-index:90;background:#0E0E10;color:#F2EFE8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem}
+#gate.off{display:none}
 .brand-big{position:relative;overflow:hidden;border-radius:16px;background:#222229;box-shadow:0 0 0 1px rgba(201,164,92,.45);margin:0 auto 1.25rem}
 .brand-big img{width:100%;display:block}
 .brand-big::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,236,190,.5) 50%,transparent 65%);transform:translateX(-130%);animation:logoShine 5s ease-in-out .6s infinite;pointer-events:none}
@@ -220,6 +224,13 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
 </head>
 <body>
 
+<div id="gate">
+  <div class="brand-big" style="width:9rem"><img src="WhatsApp%20Image%202026-11-12%20at%2023.48.07.jpeg" alt="TRAMA Luxury"/></div>
+  <h1 class="font-display" style="font-size:2.2rem;line-height:1;margin-bottom:.6rem">Em breve</h1>
+  <p style="color:#A8A7A1;max-width:22rem;line-height:1.6;margin-bottom:1.5rem">Estamos preparando a nova coleção da TRAMA. Moda masculina em São Félix do Xingu.</p>
+  <a class="btn btn-primary" id="gate-wa" href="https://wa.me/5594981552665" target="_blank">Falar no WhatsApp</a>
+  <button style="margin-top:2.5rem;font-size:.7rem;color:#5C5F66;background:none;border:none;cursor:pointer" onclick="openAdmin()">Área do lojista</button>
+</div>
 <div id="promo-bar">
   <div class="marquee-track">
     <span class="marquee-item">COMPRE PELO SITE E CONFIRME NO WHATSAPP &nbsp;✦&nbsp;</span>
@@ -1441,12 +1452,12 @@ function doAdminLogin() {
   if (!email || !pwd) { err.textContent = 'Informe e-mail e senha.'; return; }
   err.textContent = 'Entrando...';
   authCall('password', { email: email, password: pwd }).then(function(j) {
-    setAuth(j); err.textContent = '';
+    setAuth(j); err.textContent = ''; updateGate();
     document.getElementById('admin-login').classList.add('hidden'); showAdmin();
   }, function() { err.textContent = 'E-mail ou senha incorretos.'; });
 }
-function closeAdminLogin() { document.getElementById('admin-login').classList.add('hidden'); nav('home'); }
-function doAdminLogout() { setAuth(null); sessionStorage.removeItem('trama.adm'); nav('home'); }
+function closeAdminLogin() { document.getElementById('admin-login').classList.add('hidden'); nav('home'); updateGate(); }
+function doAdminLogout() { setAuth(null); sessionStorage.removeItem('trama.adm'); nav('home'); updateGate(); }
 
 function showAdmin() {
   var all = document.querySelectorAll('.view');
@@ -1761,6 +1772,11 @@ new MutationObserver(function() {
   b.onclick = function(e) { e.stopPropagation(); vd.muted = !vd.muted; if (!vd.muted) vd.play(); b.innerHTML = vd.muted ? IC_MUDO : IC_SOM; };
   m.appendChild(b);
 }).observe(document.getElementById('gallery-main'), { childList: true });
+// Loja pausada: visitantes veem "Em breve"; o admin logado ve a loja normalmente. Mude para false para reabrir.
+var LOJA_PAUSADA = true;
+function updateGate() { var g = document.getElementById('gate'); if (g) g.classList.toggle('off', !LOJA_PAUSADA || !!getAuth()); }
+updateGate();
+document.getElementById('gate-wa').href = 'https://wa.me/' + getWA();
 updateCartUI();
 renderHome();
 (function() { var m = location.hash.match(/^#p=(.+)$/); if (m) nav('product', decodeURIComponent(m[1])); })();
