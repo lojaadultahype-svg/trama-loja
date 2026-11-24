@@ -346,6 +346,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
       <h1 class="font-display display-md" id="cat-title"></h1>
       <span style="font-size:.8rem;color:var(--muted)" id="cat-count"></span>
     </div>
+    <div class="chips" id="cat-filtros" style="margin-bottom:1rem"></div>
     <div class="products-grid" id="cat-products"><div class="loading"><div class="spinner"></div></div></div>
   </div>
 </div>
@@ -364,6 +365,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
       </div>
       <div>
         <h1 class="font-display" style="font-size:clamp(1.5rem,4vw,2.2rem);line-height:1;text-transform:uppercase;margin-bottom:.4rem" id="prod-name"></h1>
+        <div id="prod-spec" style="font-size:.8rem;color:var(--muted);font-weight:600;letter-spacing:.04em;margin-bottom:.2rem"></div>
         <div style="display:flex;align-items:baseline;gap:.65rem;margin-bottom:1.25rem;margin-top:.5rem">
           <span style="font-size:1.75rem;font-weight:800" id="prod-price"></span>
           <span style="font-size:.9rem;color:var(--g400);text-decoration:line-through;display:none" id="prod-oldprice"></span>
@@ -638,6 +640,10 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
               <option value="jaquetas">Jaquetas</option>
               <option value="acessorios">Acessorios</option>
             </select>
+          </div>
+          <div class="form-row col2">
+            <div><label>Tecido</label><select class="field" id="pf-tecido"><option value="">(não informar)</option><option value="Jeans">Jeans</option><option value="Sarja">Sarja</option><option value="Alfaiataria">Alfaiataria</option><option value="Linho">Linho</option><option value="Tactel">Tactel</option><option value="Moletom">Moletom</option><option value="Malha (algodão)">Malha (algodão)</option><option value="Piquet">Piquet</option><option value="Tricô">Tricô</option><option value="Dry fit">Dry fit</option><option value="Couro sintético">Couro sintético</option><option value="Outro">Outro</option></select></div>
+            <div><label>Modelagem</label><select class="field" id="pf-modelagem"><option value="">(não informar)</option><option value="Slim">Slim</option><option value="Skinny">Skinny</option><option value="Reta">Reta</option><option value="Jogger">Jogger</option><option value="Cargo">Cargo</option><option value="Regular">Regular</option><option value="Oversized">Oversized</option><option value="Ampla">Ampla</option><option value="Country / bota">Country / bota</option></select></div>
           </div>
           <div><label>Descricao</label><textarea class="field" id="pf-desc" rows="3" placeholder="Descreva o produto..."></textarea></div>
           <div>
@@ -976,7 +982,7 @@ function cardHTML(p) {
   return '<div class="product-card">' +
     '<div class="product-image" onclick="nav(\'product\',\'' + p.id + '\')">' + mh + '<div class="badges">' + bgs + '</div></div>' +
     '<div class="product-info" onclick="nav(\'product\',\'' + p.id + '\')">' +
-    '<div class="product-name">' + p.name + '</div>' +
+    '<div class="product-name">' + p.name + '</div>' + (p.tecido || p.modelagem ? '<div style="font-size:.72rem;color:var(--muted);margin-top:.1rem">' + [p.tecido, p.modelagem].filter(Boolean).join(' · ') + '</div>' : '') +
     '<div class="product-prices"><span class="price-current">' + brl(p.price) + '</span>' + (p.old_price || p.oldPrice ? '<span class="price-old">' + brl(p.old_price || p.oldPrice) + '</span>' : '') + '</div>' +
     '<div class="price-pix">' + brl(p.price * (1 - PIX_DESC)) + ' no Pix</div>' +
     '</div></div>';
@@ -1020,6 +1026,13 @@ function renderHome() {
 
 var CATS = { camisetas: 'Camisetas', bermudas: 'Shorts e bermudas', moletons: 'Moletons', calcas: 'Calcas', jaquetas: 'Jaquetas', acessorios: 'Acessorios' };
 
+var CAT_LIST = [];
+function catFiltro(tec, btn) {
+  if (btn) { var b = btn.parentNode.querySelectorAll('.tag'); for (var i = 0; i < b.length; i++) b[i].classList.remove('active'); btn.classList.add('active'); }
+  var l = tec ? CAT_LIST.filter(function(p) { return p.tecido === tec; }) : CAT_LIST;
+  document.getElementById('cat-count').textContent = l.length + ' produto(s)';
+  document.getElementById('cat-products').innerHTML = l.length ? l.map(cardHTML).join('') : '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">Nenhum produto nesta categoria.</div>';
+}
 function renderCat(slug) {
   document.getElementById('cat-title').textContent = CATS[slug] || slug;
   document.getElementById('cat-bc').innerHTML = '<a href="#" onclick="nav(\'home\');return false">Inicio</a> / <span>' + (CATS[slug] || slug) + '</span>';
@@ -1027,8 +1040,10 @@ function renderCat(slug) {
   dbGet('products', 'category=eq.' + slug + '&order=created_at.desc').then(function(r) {
     var list = (r && r.length > 0) ? r : DEF.filter(function(p) { return p.category === slug; });
     var m = {}; PRODS.forEach(function(p) { m[p.id] = p; }); list.forEach(function(p) { m[p.id] = p; }); PRODS = Object.values(m);
-    document.getElementById('cat-count').textContent = list.length + ' produto(s)';
-    document.getElementById('cat-products').innerHTML = list.length ? list.map(cardHTML).join('') : '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">Nenhum produto nesta categoria.</div>';
+    CAT_LIST = list; catFiltro(null);
+    // Filtro por tecido (Jeans, Sarja...) quando a categoria tem mais de um
+    var tecs = []; list.forEach(function(p) { if (p.tecido && tecs.indexOf(p.tecido) < 0) tecs.push(p.tecido); });
+    document.getElementById('cat-filtros').innerHTML = tecs.length > 1 ? ['Todos'].concat(tecs).map(function(t, i) { return '<button class="tag' + (i === 0 ? ' active' : '') + '" onclick="catFiltro(' + (i === 0 ? 'null' : '\'' + t + '\'') + ',this)">' + t + '</button>'; }).join('') : '';
   });
 }
 
@@ -1053,6 +1068,7 @@ function renderProdData(p) {
   curProd = p; prodQty = 1; prodSize = null; prodColor = p.colors && p.colors[0] ? p.colors[0] : null;
   document.getElementById('prod-bc').innerHTML = '<a href="#" onclick="nav(\'home\');return false">Inicio</a> / <a href="#" onclick="nav(\'cat\',\'' + p.category + '\');return false">' + (CATS[p.category] || p.category) + '</a> / <span>' + p.name + '</span>';
   document.getElementById('prod-name').textContent = p.name;
+  document.getElementById('prod-spec').textContent = [p.tecido ? 'Tecido: ' + p.tecido : '', p.modelagem ? 'Modelagem: ' + p.modelagem : ''].filter(Boolean).join('  ·  ');
   document.getElementById('prod-price').textContent = brl(p.price);
   document.getElementById('bb-price').textContent = brl(p.price); document.getElementById('bb-pix').textContent = brl(p.price * (1 - PIX_DESC)) + ' no Pix'; document.getElementById('bb-btn').textContent = 'Escolher tamanho';
   document.getElementById('prod-pix').textContent = 'ou ' + brl(p.price * (1 - PIX_DESC)) + ' no Pix (10% off)';
@@ -1549,7 +1565,7 @@ function openNewProd() {
   editId = null; tmpMedia = [];
   document.getElementById('prod-form-title').textContent = 'Novo produto';
   document.getElementById('pf-name').value = ''; document.getElementById('pf-price').value = '';
-  document.getElementById('pf-oldprice').value = ''; document.getElementById('pf-cat').value = 'camisetas';
+  document.getElementById('pf-oldprice').value = ''; document.getElementById('pf-cat').value = 'camisetas'; document.getElementById('pf-tecido').value = ''; document.getElementById('pf-modelagem').value = '';
   document.getElementById('pf-desc').value = ''; document.getElementById('pf-media-link').value = '';
   document.getElementById('pf-del-btn').style.display = 'none';
   document.getElementById('pf-enc').checked = false; document.getElementById('pf-enc-ped').value = ''; document.getElementById('pf-enc-ent').value = '';
@@ -1575,7 +1591,7 @@ function editProd(id) {
   document.getElementById('pf-name').value = p.name;
   document.getElementById('pf-price').value = p.price;
   document.getElementById('pf-oldprice').value = p.old_price || '';
-  document.getElementById('pf-cat').value = p.category;
+  document.getElementById('pf-cat').value = p.category; document.getElementById('pf-tecido').value = p.tecido || ''; document.getElementById('pf-modelagem').value = p.modelagem || '';
   document.getElementById('pf-desc').value = p.description || '';
   document.getElementById('pf-media-link').value = '';
   document.getElementById('pf-del-btn').style.display = 'flex';
@@ -1700,7 +1716,7 @@ function saveProd() {
     if ((bv && bv.value) || (cv && cv.value) || (qv && qv.value) || (lv && lv.value)) { sc[sn] = { b: parseFloat(bv.value) || null, c: cv ? parseFloat(cv.value) || null : null, q: qv ? parseFloat(qv.value) || null : null, l: lv ? parseFloat(lv.value) || null : null }; }
   }
 
-  var data = { name: name, price: price, old_price: op, category: cat, description: desc, sizes: sizes, sold_out: soldOut, colors: colors, tags: tags, media: tmpMedia, size_chart: sc, encomenda: document.getElementById('pf-enc').checked, pedido_data: document.getElementById('pf-enc-ped').value || null, entrega_data: document.getElementById('pf-enc-ent').value || null };
+  var data = { name: name, price: price, old_price: op, category: cat, description: desc, sizes: sizes, sold_out: soldOut, colors: colors, tags: tags, media: tmpMedia, size_chart: sc, encomenda: document.getElementById('pf-enc').checked, tecido: document.getElementById('pf-tecido').value || null, modelagem: document.getElementById('pf-modelagem').value || null, pedido_data: document.getElementById('pf-enc-ped').value || null, entrega_data: document.getElementById('pf-enc-ent').value || null };
   var fn = editId ? dbUpd('products', editId, data) : dbIns('products', Object.assign({ id: uid(), created_at: new Date().toISOString() }, data));
   fn.then(function() { toast('Produto salvo!'); closeProdForm(); loadAdminProds(); });
 }
