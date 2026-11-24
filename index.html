@@ -643,6 +643,13 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
             <div><label>Preco (R$)</label><input class="field" type="number" id="pf-price" placeholder="89.90" step="0.01"/></div>
             <div><label>Preco antigo (opcional)</label><input class="field" type="number" id="pf-oldprice" placeholder="119.90" step="0.01"/></div>
           </div>
+          <div class="card" style="padding:.85rem;border-color:var(--coral)">
+            <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;margin:0"><input type="checkbox" id="pf-enc" style="width:1.1rem;height:1.1rem"/> <b>Sob encomenda</b> (peça ainda não está em estoque)</label>
+            <div class="form-row col2" style="margin-top:.65rem">
+              <div><label>Data do pedido ao fornecedor</label><input class="field" type="date" id="pf-enc-ped"/></div>
+              <div><label>Entrega prevista ao cliente</label><input class="field" type="date" id="pf-enc-ent"/></div>
+            </div>
+          </div>
           <div><label>Categoria</label>
             <select class="field" id="pf-cat">
               <option value="camisetas">Camisetas</option>
@@ -732,13 +739,6 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
               <button type="button" class="tag" data-tag="mais-vendido" onclick="this.classList.toggle('active')">Mais vendido</button>
               <button type="button" class="tag" data-tag="novo" onclick="this.classList.toggle('active')">Novo</button>
               <button type="button" class="tag" data-tag="promo" onclick="this.classList.toggle('active')">Promocao</button>
-            </div>
-          </div>
-          <div class="card" style="padding:.85rem">
-            <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;margin:0"><input type="checkbox" id="pf-enc" style="width:1.1rem;height:1.1rem"/> Sob encomenda (peça ainda não está em estoque)</label>
-            <div class="form-row col2" style="margin-top:.65rem">
-              <div><label>Data do pedido ao fornecedor</label><input class="field" type="date" id="pf-enc-ped"/></div>
-              <div><label>Entrega prevista ao cliente</label><input class="field" type="date" id="pf-enc-ent"/></div>
             </div>
           </div>
           <div>
