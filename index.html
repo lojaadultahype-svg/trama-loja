@@ -720,6 +720,11 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
               <button type="button" class="tag" data-color="laranja" onclick="this.classList.toggle('active')">Laranja</button>
               <button type="button" class="tag" data-color="mostarda" onclick="this.classList.toggle('active')">Mostarda</button>
             </div>
+            <div style="display:flex;gap:.4rem;align-items:center;margin-top:.5rem;flex-wrap:wrap">
+              <input class="field" id="pf-newcolor-name" placeholder="Nova cor (ex.: Jeans claro)" style="flex:1;min-width:10rem;padding:.5rem .7rem;font-size:.82rem"/>
+              <input type="color" id="pf-newcolor-hex" value="#8FB3D9" title="Escolha o tom" style="width:2.6rem;height:2.4rem;border:none;background:none;cursor:pointer;padding:0"/>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="addCor()">+ Adicionar cor</button>
+            </div>
           </div>
           <div>
             <label>Tags</label>
@@ -1136,9 +1141,9 @@ function renderProdData(p) {
   }).join('') : '';
 
   var CMAP = { preto: '#16181D', branco: '#F6F4EF', coral: '#FF5470', verde: '#4B5D3A', bege: '#D8CBB5', azul: '#3A4A6B', cinza: '#55585E', grafite: '#3B3D42', rosa: '#E8C6C3', oliva: '#6E6B45', marrom: '#5A3A2A', salmao: '#E38B76', 'verde-escuro': '#25362A', 'off-white': '#ECE8DF', vinho: '#5E1F2A', caqui: '#B8A27A', laranja: '#F07F1A', mostarda: '#B8963E' };
-  document.getElementById('prod-color-label').textContent = prodColor || '';
+  document.getElementById('prod-color-label').textContent = corNome(prodColor || '');
   document.getElementById('prod-colors').innerHTML = (p.colors || []).map(function(c) {
-    return '<button class="swatch' + (c === prodColor ? ' active' : '') + '" style="background:' + (CMAP[c] || '#ccc') + '" title="' + c + '" onclick="selColor(\'' + c + '\',this)"></button>';
+    return '<button class="swatch' + (c === prodColor ? ' active' : '') + '" style="background:' + corHex(c) + '" title="' + corNome(c) + '" onclick="selColor(\'' + c + '\',this)"></button>';
   }).join('');
   var so = p.sold_out || [];
   document.getElementById('prod-sizes').innerHTML = (p.sizes || []).map(function(s) {
@@ -1215,7 +1220,7 @@ function closeLB() { document.getElementById('lightbox').classList.remove('open'
 
 function selColor(c, btn) {
   prodColor = c;
-  document.getElementById('prod-color-label').textContent = c;
+  document.getElementById('prod-color-label').textContent = corNome(c);
   var all = document.querySelectorAll('#prod-colors .swatch');
   for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
   btn.classList.add('active');
@@ -1382,7 +1387,7 @@ function renderCart() {
     var ih = m ? mel(m, 'width:100%;height:100%;object-fit:cover') : '';
     return '<div class="cart-item"><div class="cart-img">' + ih + '</div>' +
       '<div style="flex:1"><div style="font-weight:700;font-size:.88rem">' + item.name + '</div>' +
-      '<div style="font-size:.75rem;color:var(--muted)">Tam ' + item.size + (item.color ? ' · ' + item.color : '') + '</div>' +
+      '<div style="font-size:.75rem;color:var(--muted)">Tam ' + item.size + (item.color ? ' · ' + corNome(item.color) : '') + '</div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:.65rem">' +
       '<div class="qty-mini"><button onclick="upCartQty(\'' + item.key + '\',-1)">-</button><span style="font-weight:700;min-width:1.5rem;text-align:center">' + item.qty + '</span><button onclick="upCartQty(\'' + item.key + '\',1)">+</button></div>' +
       '<span style="font-weight:800">' + brl(item.price * item.qty) + '</span></div></div>' +
@@ -1485,7 +1490,7 @@ function doWhatsapp() {
     visTxt = dd[2] + '/' + dd[1] + ' (' + DIAS[new Date(dia + 'T00:00:00').getDay()] + ') as ' + hora + 'h';
   }
   var tt = cartTotals(), sub = tt.sub;
-  var itxt = cart.map(function(i) { return '* ' + i.name + ' (Tam ' + i.size + (i.color ? ', ' + i.color : '') + ') x' + i.qty + ' = ' + brl(i.price * i.qty) + (i.enc ? encodeURIComponent(' [ENCOMENDA - entrega prevista ' + fmtData(i.enc) + ']') : ''); }).join('%0A');
+  var itxt = cart.map(function(i) { return '* ' + i.name + ' (Tam ' + i.size + (i.color ? ', ' + corNome(i.color) : '') + ') x' + i.qty + ' = ' + brl(i.price * i.qty) + (i.enc ? encodeURIComponent(' [ENCOMENDA - entrega prevista ' + fmtData(i.enc) + ']') : ''); }).join('%0A');
   var pay = curPay === 'pix' ? 'Pix' : 'Na entrega/retirada';
   var rec = curRec === 'retirada' ? '%0A*Recebimento:* ' + encodeURIComponent('Retirada com a gente (combinar horario)')
     : curRec === 'visita' ? '%0A*Recebimento:* ' + encodeURIComponent('Visita para provar em casa') + '%0A*Visita:* ' + encodeURIComponent(visTxt) + '%0ABairro: ' + encodeURIComponent(bairro) + '%0AEndereco: ' + encodeURIComponent(end)
@@ -1605,7 +1610,7 @@ function openNewProd() {
   editId = null; tmpMedia = [];
   document.getElementById('prod-form-title').textContent = 'Novo produto';
   document.getElementById('pf-name').value = ''; document.getElementById('pf-price').value = '';
-  document.getElementById('pf-oldprice').value = ''; document.getElementById('pf-cat').value = 'camisetas'; document.getElementById('pf-tecido').value = ''; document.getElementById('pf-modelagem').value = '';
+  document.getElementById('pf-oldprice').value = ''; document.getElementById('pf-cat').value = 'camisetas'; document.getElementById('pf-tecido').value = ''; document.getElementById('pf-modelagem').value = ''; document.querySelectorAll('#pf-colors .cor-custom').forEach(function(b) { b.remove(); });
   document.getElementById('pf-desc').value = ''; document.getElementById('pf-media-link').value = '';
   document.getElementById('pf-del-btn').style.display = 'none';
   document.getElementById('pf-enc').checked = false; document.getElementById('pf-enc-ped').value = ''; document.getElementById('pf-enc-ent').value = '';
@@ -1642,7 +1647,9 @@ function editProd(id) {
   var soTags = document.querySelectorAll('#pf-soldout .tag');
   for (var j2 = 0; j2 < soTags.length; j2++) soTags[j2].classList.toggle('active', (p.sold_out || []).indexOf(soTags[j2].textContent.trim()) > -1);
   var clTags = document.querySelectorAll('#pf-colors .tag');
+  document.querySelectorAll('#pf-colors .cor-custom').forEach(function(b) { b.remove(); });
   for (var k = 0; k < clTags.length; k++) clTags[k].classList.toggle('active', (p.colors || []).indexOf(clTags[k].dataset.color) > -1);
+  (p.colors || []).forEach(function(c) { if (!document.querySelector('#pf-colors .tag[data-color="' + c.replace(/"/g, '') + '"]')) addCorTag(c, true); });
   var tgTags = document.querySelectorAll('.admin-section .tag[data-tag]');
   for (var l = 0; l < tgTags.length; l++) tgTags[l].classList.toggle('active', (p.tags || []).indexOf(tgTags[l].dataset.tag) > -1);
 
@@ -1710,6 +1717,22 @@ function uploadMedia(files) {
     });
     chain.then(function() { st.textContent = done + ' arquivo(s) enviado(s)' + (fail ? ', ' + fail + ' com erro' : '') + '. Clique em Salvar produto para publicar.'; });
   });
+}
+// Cores personalizadas: salvas como "Nome:#hex" (ex.: "Jeans claro:#8FB3D9")
+function corNome(c) { c = String(c || ''); var n = c.split(':#')[0]; return n.charAt(0).toUpperCase() + n.slice(1); }
+function corHex(c) { c = String(c || ''); var m = c.split(':#'); return m[1] ? '#' + m[1] : (CMAP[c] || '#ccc'); }
+function addCorTag(key, ativo) {
+  var b = document.createElement('button'); b.type = 'button'; b.className = 'tag cor-custom' + (ativo ? ' active' : ''); b.dataset.color = key;
+  b.onclick = function() { this.classList.toggle('active'); };
+  b.innerHTML = '<span style="display:inline-block;width:.8rem;height:.8rem;border-radius:50%;margin-right:.35rem;vertical-align:-1px;background:' + corHex(key) + '"></span>' + corNome(key);
+  document.getElementById('pf-colors').appendChild(b);
+}
+function addCor() {
+  var nome = document.getElementById('pf-newcolor-name').value.replace(/['"<>:#]/g, '').trim();
+  if (!nome) { toast('Digite o nome da cor'); return; }
+  var hex = document.getElementById('pf-newcolor-hex').value.replace('#', '');
+  addCorTag(nome + ':#' + hex, true); document.getElementById('pf-newcolor-name').value = '';
+  toast('Cor adicionada! Lembre de salvar o produto.');
 }
 function renderMediaPrev() {
   document.getElementById('pf-media-preview').innerHTML = tmpMedia.map(function(m, i) {
