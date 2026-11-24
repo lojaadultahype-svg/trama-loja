@@ -731,9 +731,13 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
             </div>
           </div>
           <div>
-            <label>Fotos e Videos (links do Cloudinary)</label>
+            <label>Fotos e Videos</label>
+            <label class="btn btn-primary" style="width:100%;margin-bottom:.4rem;cursor:pointer;color:var(--ink)" for="pf-files">Enviar fotos ou vídeos do aparelho</label>
+            <input type="file" id="pf-files" accept="image/*,video/*" multiple style="display:none" onchange="uploadMedia(this.files);this.value=''"/>
+            <p id="pf-up-status" style="font-size:.75rem;color:var(--muted);min-height:1rem;margin-bottom:.5rem">Pode escolher várias de uma vez. As fotos são reduzidas automaticamente para o site ficar rápido.</p>
+            <div style="font-size:.72rem;color:var(--muted);margin-bottom:.3rem">Ou cole um link de imagem:</div>
             <div style="display:flex;gap:.5rem;margin-bottom:.5rem">
-              <input class="field" type="text" id="pf-media-link" placeholder="Cole o link do Cloudinary aqui..."/>
+              <input class="field" type="text" id="pf-media-link" placeholder="https://..."/>
               <button class="btn btn-primary btn-sm" type="button" onclick="addMedia()">+ Adicionar</button>
             </div>
             <p style="font-size:.72rem;color:var(--coral);font-weight:600;margin-bottom:.5rem">A primeira midia e a CAPA do anuncio. Arraste para reordenar.</p>
@@ -1577,6 +1581,46 @@ function addMedia() {
   toast((v ? 'Video' : 'Foto') + ' adicionado!');
 }
 
+// Envio de fotos/videos para o Supabase Storage (pasta "produtos")
+function shrinkImage(file) {
+  return new Promise(function(res) {
+    if (!/^image\//.test(file.type) || /gif/.test(file.type)) { res(file); return; }
+    var img = new Image(), url = URL.createObjectURL(file);
+    img.onload = function() {
+      var max = 1400, w = img.width, h = img.height, k = Math.min(1, max / Math.max(w, h));
+      var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      c.toBlob(function(b) { res(b || file); }, 'image/jpeg', 0.82);
+    };
+    img.onerror = function() { res(file); }; img.src = url;
+  });
+}
+function uploadMedia(files) {
+  files = Array.prototype.slice.call(files || []); if (!files.length) return;
+  var st = document.getElementById('pf-up-status'), done = 0, fail = 0;
+  st.textContent = 'Enviando 0 de ' + files.length + '...';
+  ensureAuth().then(function(tok) {
+    if (!tok) { st.textContent = 'Faça login no Admin de novo para enviar.'; return; }
+    var chain = Promise.resolve();
+    files.forEach(function(f) {
+      chain = chain.then(function() {
+        var isVid = /^video\//.test(f.type);
+        if (isVid && f.size > 50 * 1024 * 1024) { fail++; toast('Vídeo muito grande (máx. 50 MB): ' + f.name); return; }
+        return (isVid ? Promise.resolve(f) : shrinkImage(f)).then(function(blob) {
+          var ext = isVid ? ((f.name.split('.').pop() || 'mp4').toLowerCase()) : 'jpg';
+          var path = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + ext;
+          return fetch(SUPA_URL + '/storage/v1/object/produtos/' + path, { method: 'POST', headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + tok, 'Content-Type': isVid ? (f.type || 'video/mp4') : 'image/jpeg', 'x-upsert': 'true' }, body: blob })
+            .then(function(r) {
+              if (!r.ok) { fail++; return; }
+              tmpMedia.push({ type: isVid ? 'video' : 'image', data: SUPA_URL + '/storage/v1/object/public/produtos/' + path });
+              done++; renderMediaPrev(); st.textContent = 'Enviando ' + done + ' de ' + files.length + '...';
+            });
+        });
+      });
+    });
+    chain.then(function() { st.textContent = done + ' arquivo(s) enviado(s)' + (fail ? ', ' + fail + ' com erro' : '') + '. Clique em Salvar produto para publicar.'; });
+  });
+}
 function renderMediaPrev() {
   document.getElementById('pf-media-preview').innerHTML = tmpMedia.map(function(m, i) {
     var s = gsrc(m); var v = isvid(m);
