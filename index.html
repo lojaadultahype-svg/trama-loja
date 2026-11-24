@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="theme-color" content="#0E0E10"/>
 <!-- LOJA PAUSADA: remover esta linha e mudar LOJA_PAUSADA para false para reabrir -->
-<meta name="robots" content="noindex, nofollow"/>
+
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>TRAMA Luxury | Moda em São Félix do Xingu</title>
 <meta name="description" content="TRAMA Luxury, loja de roupas em São Félix do Xingu - PA. Escolha no site, confirme pelo WhatsApp e receba em casa ou retire com a gente. Pix ou pagamento na entrega."/>
@@ -1838,7 +1838,7 @@ new MutationObserver(function() {
   m.appendChild(b);
 }).observe(document.getElementById('gallery-main'), { childList: true });
 // Loja pausada: visitantes veem "Em breve"; o admin logado ve a loja normalmente. Mude para false para reabrir.
-var LOJA_PAUSADA = true;
+var LOJA_PAUSADA = false;
 function updateGate() { var g = document.getElementById('gate'); if (g) g.classList.toggle('off', !LOJA_PAUSADA || !!getAuth()); }
 updateGate();
 document.getElementById('gate-wa').href = 'https://wa.me/' + getWA();
