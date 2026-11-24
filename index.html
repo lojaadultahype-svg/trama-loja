@@ -338,6 +338,12 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
     <div class="eyebrow" id="home-prods" style="margin-bottom:.5rem;scroll-margin-top:5rem">Destaques</div>
     <h2 class="font-display display-md" style="margin-bottom:1.5rem">Escolha a sua</h2>
     <div class="grid4" id="home-bestsellers"><div class="loading"><div class="spinner"></div></div></div>
+    <div id="home-jeans-wrap" style="display:none;margin-top:3rem">
+      <div class="eyebrow" style="margin-bottom:.5rem">Linha jeans</div>
+      <h2 class="font-display display-md" style="margin-bottom:1rem">Todos os jeans</h2>
+      <div class="chips" id="home-jeans-chips" style="margin-bottom:1rem"></div>
+      <div class="grid4" id="home-jeans"></div>
+    </div>
     <div class="eyebrow" style="margin-top:3rem;margin-bottom:.5rem">Novidades</div>
     <h2 class="font-display display-md" style="margin-bottom:1.5rem">Chegou agora</h2>
     <div class="grid4" id="home-news"></div>
@@ -1025,6 +1031,12 @@ function heroGo(i, manual) {
   for (var k = 0; k < sl.length; k++) { sl[k].classList.toggle('on', k === heroIdx); if (dt[k]) dt[k].classList.toggle('on', k === heroIdx); }
   if (manual) { clearInterval(heroTimer); heroTimer = setInterval(function() { heroGo(heroIdx + 1); }, 6000); }
 }
+var JEANS = [];
+function jeansFiltro(m, btn) {
+  if (btn) { var b = btn.parentNode.querySelectorAll('.tag'); for (var i = 0; i < b.length; i++) b[i].classList.remove('active'); btn.classList.add('active'); }
+  var l = m ? JEANS.filter(function(p) { return (p.modelagem || (p.category === 'bermudas' ? 'Bermuda' : '')) === m; }) : JEANS;
+  document.getElementById('home-jeans').innerHTML = l.map(cardHTML).join('');
+}
 function renderHome() {
   updateCats();
   document.getElementById('home-bestsellers').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -1039,6 +1051,12 @@ function renderHome() {
     // Banner: alterna entre os produtos que tem foto (carrossel)
     var tops = PRODS === DEF ? [] : PRODS.filter(function(p) { return (p.media || []).length; }).slice(0, 6);
     heroCarousel(tops);
+    // Secao "Todos os jeans": todas as pecas de tecido jeans, com filtro por modelagem
+    JEANS = PRODS === DEF ? [] : PRODS.filter(function(p) { return (p.tecido || '').toLowerCase() === 'jeans' || /jeans/i.test(p.name); });
+    document.getElementById('home-jeans-wrap').style.display = JEANS.length ? '' : 'none';
+    var mods = []; JEANS.forEach(function(p) { var m = p.modelagem || (p.category === 'bermudas' ? 'Bermuda' : ''); if (m && mods.indexOf(m) < 0) mods.push(m); });
+    document.getElementById('home-jeans-chips').innerHTML = mods.length > 1 ? ['Todos'].concat(mods).map(function(m, i) { return '<button class="tag' + (i === 0 ? ' active' : '') + '" onclick="jeansFiltro(' + (i === 0 ? 'null' : '\'' + m + '\'') + ',this)">' + m + '</button>'; }).join('') : '';
+    jeansFiltro(null);
     var hnT = hn.previousElementSibling, hnE = hnT && hnT.previousElementSibling; [hnT, hnE].forEach(function(e) { if (e) e.style.display = news.length ? '' : 'none'; });
   });
 }
