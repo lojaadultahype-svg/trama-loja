@@ -369,6 +369,7 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
           <span style="font-size:.9rem;color:var(--g400);text-decoration:line-through;display:none" id="prod-oldprice"></span>
         </div>
         <div style="font-size:.85rem;font-weight:700;color:var(--coral);margin:-.9rem 0 1.25rem" id="prod-pix"></div>
+        <div id="prod-enc" style="display:none;border:1px solid var(--coral);background:rgba(201,164,92,.08);border-radius:var(--rad-sm);padding:.75rem .9rem;margin-bottom:1.25rem;font-size:.82rem;line-height:1.55"></div>
         <div style="margin-bottom:1.25rem">
           <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.5rem">Cor: <span id="prod-color-label" style="color:var(--fg);text-transform:none"></span></div>
           <div class="color-swatches" id="prod-colors"></div>
@@ -692,6 +693,13 @@ footer{border-top:1px solid var(--border);background:var(--g100);margin-top:4rem
               <button type="button" class="tag" data-tag="promo" onclick="this.classList.toggle('active')">Promocao</button>
             </div>
           </div>
+          <div class="card" style="padding:.85rem">
+            <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;margin:0"><input type="checkbox" id="pf-enc" style="width:1.1rem;height:1.1rem"/> Sob encomenda (peça ainda não está em estoque)</label>
+            <div class="form-row col2" style="margin-top:.65rem">
+              <div><label>Data do pedido ao fornecedor</label><input class="field" type="date" id="pf-enc-ped"/></div>
+              <div><label>Entrega prevista ao cliente</label><input class="field" type="date" id="pf-enc-ent"/></div>
+            </div>
+          </div>
           <div>
             <label>Tabela de medidas por tamanho (para o Provador)</label>
             <p style="font-size:.75rem;color:var(--coral);font-weight:600;margin-bottom:.5rem">Informe as medidas do CORPO de quem veste cada tamanho, não da peça. Se medir a peça, tire uns 6 cm do busto e da cintura.</p>
@@ -932,7 +940,7 @@ function cardHTML(p) {
   var d = disc(p.price, p.old_price || p.oldPrice);
   var ma = p.media || [];
   var mh = ma.length > 0 ? mel(ma[0]) + (isvid(ma[0]) ? PLAY_IC : '') : '<div class="product-img-placeholder">foto</div>';
-  var bgs = (d > 0 ? '<span class="badge-tag badge-promo">-' + d + '%</span>' : '') + ((p.tags || []).indexOf('novo') > -1 ? '<span class="badge-tag badge-novo">Novo</span>' : '') + ((p.sizes || []).length && (p.sizes || []).every(function(z) { return (p.sold_out || []).indexOf(z) > -1; }) ? '<span class="badge-tag badge-esgotado">Esgotado</span>' : '');
+  var bgs = (d > 0 ? '<span class="badge-tag badge-promo">-' + d + '%</span>' : '') + ((p.tags || []).indexOf('novo') > -1 ? '<span class="badge-tag badge-novo">Novo</span>' : '') + ((p.sizes || []).length && (p.sizes || []).every(function(z) { return (p.sold_out || []).indexOf(z) > -1; }) ? '<span class="badge-tag badge-esgotado">Esgotado</span>' : '') + (p.encomenda ? '<span class="badge-tag badge-novo">Encomenda</span>' : '');
   return '<div class="product-card">' +
     '<div class="product-image" onclick="nav(\'product\',\'' + p.id + '\')">' + mh + '<div class="badges">' + bgs + '</div></div>' +
     '<div class="product-info" onclick="nav(\'product\',\'' + p.id + '\')">' +
@@ -1016,6 +1024,8 @@ function renderProdData(p) {
   document.getElementById('prod-price').textContent = brl(p.price);
   document.getElementById('bb-price').textContent = brl(p.price); document.getElementById('bb-pix').textContent = brl(p.price * (1 - PIX_DESC)) + ' no Pix'; document.getElementById('bb-btn').textContent = 'Escolher tamanho';
   document.getElementById('prod-pix').textContent = 'ou ' + brl(p.price * (1 - PIX_DESC)) + ' no Pix (10% off)';
+  var encBox = document.getElementById('prod-enc');
+  if (p.encomenda) { encBox.innerHTML = encTexto(p); encBox.style.display = 'block'; } else encBox.style.display = 'none';
   var op = document.getElementById('prod-oldprice');
   if (p.old_price || p.oldPrice) { op.textContent = brl(p.old_price || p.oldPrice); op.style.display = 'inline'; } else op.style.display = 'none';
 
@@ -1141,6 +1151,13 @@ function selSize(s, btn) {
   btn.classList.add('active');
   document.getElementById('prod-size-error').textContent = '';
 }
+// Sob encomenda: datas do pedido ao fornecedor e da entrega
+function fmtData(d) { if (!d || d === 'a combinar') return 'a combinar'; var x = String(d).split('-'); return x.length === 3 ? x[2] + '/' + x[1] : d; }
+function encTexto(p) {
+  var hoje = new Date().toISOString().slice(0, 10), ped = p.pedido_data, ent = p.entrega_data;
+  var l1 = ped ? (ped >= hoje ? 'Pedidos até <b>' + fmtData(ped) + '</b>, quando fazemos a compra com o fornecedor.' : 'Pedido ao fornecedor já realizado.') : 'Fazemos a compra assim que fechar o lote.';
+  return '<div style="font-weight:800;color:var(--coral);margin-bottom:.2rem">Peça sob encomenda</div>' + l1 + '<br>Entrega prevista: <b>' + (ent ? 'até ' + fmtData(ent) : 'a combinar') + '</b>. Garanta a sua pelo WhatsApp.';
+}
 // Barra fixa de compra no celular
 function buyBar() {
   if (!prodSize) {
@@ -1159,7 +1176,7 @@ function addToCart() {
   var ex = null;
   for (var i = 0; i < cart.length; i++) { if (cart[i].key === key) { ex = cart[i]; break; } }
   if (ex) ex.qty += prodQty;
-  else cart.push({ key: key, id: curProd.id, name: curProd.name, price: curProd.price, size: prodSize, color: prodColor, qty: prodQty, media: curProd.media || [] });
+  else cart.push({ key: key, id: curProd.id, name: curProd.name, price: curProd.price, size: prodSize, color: prodColor, qty: prodQty, media: curProd.media || [], enc: curProd.encomenda ? (curProd.entrega_data || 'a combinar') : null });
   localStorage.setItem('trama.cart', JSON.stringify(cart));
   updateCartUI(); toast('Adicionado a sacola!');
 }
@@ -1372,7 +1389,7 @@ function doWhatsapp() {
     visTxt = dd[2] + '/' + dd[1] + ' (' + DIAS[new Date(dia + 'T00:00:00').getDay()] + ') as ' + hora + 'h';
   }
   var tt = cartTotals(), sub = tt.sub;
-  var itxt = cart.map(function(i) { return '* ' + i.name + ' (Tam ' + i.size + (i.color ? ', ' + i.color : '') + ') x' + i.qty + ' = ' + brl(i.price * i.qty); }).join('%0A');
+  var itxt = cart.map(function(i) { return '* ' + i.name + ' (Tam ' + i.size + (i.color ? ', ' + i.color : '') + ') x' + i.qty + ' = ' + brl(i.price * i.qty) + (i.enc ? encodeURIComponent(' [ENCOMENDA - entrega prevista ' + fmtData(i.enc) + ']') : ''); }).join('%0A');
   var pay = curPay === 'pix' ? 'Pix' : 'Na entrega/retirada';
   var rec = curRec === 'retirada' ? '%0A*Recebimento:* ' + encodeURIComponent('Retirada com a gente (combinar horario)')
     : curRec === 'visita' ? '%0A*Recebimento:* ' + encodeURIComponent('Visita para provar em casa') + '%0A*Visita:* ' + encodeURIComponent(visTxt) + '%0ABairro: ' + encodeURIComponent(bairro) + '%0AEndereco: ' + encodeURIComponent(end)
@@ -1495,6 +1512,7 @@ function openNewProd() {
   document.getElementById('pf-oldprice').value = ''; document.getElementById('pf-cat').value = 'camisetas';
   document.getElementById('pf-desc').value = ''; document.getElementById('pf-media-link').value = '';
   document.getElementById('pf-del-btn').style.display = 'none';
+  document.getElementById('pf-enc').checked = false; document.getElementById('pf-enc-ped').value = ''; document.getElementById('pf-enc-ent').value = '';
   var ts = document.querySelectorAll('#pf-sizes .tag, #pf-soldout .tag, #pf-colors .tag, .admin-section .tag[data-tag]');
   for (var i = 0; i < ts.length; i++) ts[i].classList.remove('active');
   var sns = ['PP','P','M','G','GG','XG'];
@@ -1521,6 +1539,7 @@ function editProd(id) {
   document.getElementById('pf-desc').value = p.description || '';
   document.getElementById('pf-media-link').value = '';
   document.getElementById('pf-del-btn').style.display = 'flex';
+  document.getElementById('pf-enc').checked = !!p.encomenda; document.getElementById('pf-enc-ped').value = p.pedido_data || ''; document.getElementById('pf-enc-ent').value = p.entrega_data || '';
 
   var szTags = document.querySelectorAll('#pf-sizes .tag');
   for (var j = 0; j < szTags.length; j++) szTags[j].classList.toggle('active', (p.sizes || []).indexOf(szTags[j].textContent.trim()) > -1);
@@ -1601,7 +1620,7 @@ function saveProd() {
     if (bv && bv.value) { sc[sn] = { b: parseFloat(bv.value) || null, c: cv ? parseFloat(cv.value) || null : null, q: qv ? parseFloat(qv.value) || null : null, l: lv ? parseFloat(lv.value) || null : null }; }
   }
 
-  var data = { name: name, price: price, old_price: op, category: cat, description: desc, sizes: sizes, sold_out: soldOut, colors: colors, tags: tags, media: tmpMedia, size_chart: sc };
+  var data = { name: name, price: price, old_price: op, category: cat, description: desc, sizes: sizes, sold_out: soldOut, colors: colors, tags: tags, media: tmpMedia, size_chart: sc, encomenda: document.getElementById('pf-enc').checked, pedido_data: document.getElementById('pf-enc-ped').value || null, entrega_data: document.getElementById('pf-enc-ent').value || null };
   var fn = editId ? dbUpd('products', editId, data) : dbIns('products', Object.assign({ id: uid(), created_at: new Date().toISOString() }, data));
   fn.then(function() { toast('Produto salvo!'); closeProdForm(); loadAdminProds(); });
 }
